@@ -15,7 +15,15 @@ class ErrorHandler(commands.Cog):
     ):
         if isinstance(error, commands.CommandNotFound):
             return
-        elif isinstance(error, commands.CommandInvokeError):
+        elif isinstance(error, commands.BotMissingPermissions):
+            await ctx.send(
+                f"Go to **server settings** -> {ctx.guild.me.top_role.mention} and enable the checkbox for the following permissions:\n **{','.join(error.missing_perms)}**"
+            )
+        elif isinstance(error, commands.MissingPermissions):
+            await ctx.send(
+                f"You are missing the following permissions:\n**{','.join(error.missing_perms)}**"
+            )
+        else:
             await ctx.send("Oopsy, something's broken")
             title = " ".join(
                 re.compile(r"[A-Z][a-z]*").findall(error.__class__.__name__)
