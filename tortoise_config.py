@@ -1,6 +1,6 @@
 from config import common
 
-database_uri = common.common.database_uri
+database_uri = common.common.database_url
 
 tortoise_config = {
     "connections": {
