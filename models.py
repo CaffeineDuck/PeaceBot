@@ -34,7 +34,6 @@ class GuildModel(Model):
         default=bot_config.bot_prefix,
         description="Custom prefix of the guild",
     )
-    all_autoresponses = fields.ForeignKeyRelation[AutoResponseModel]
 
     @classmethod
     async def from_id(cls, guild_id: int):
