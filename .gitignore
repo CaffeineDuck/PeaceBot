@@ -1,3 +1,5 @@
 /.vscode
 .env
 /migrations
+/cache/**.json
+**/**/__pycache__

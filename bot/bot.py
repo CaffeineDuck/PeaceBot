@@ -31,7 +31,18 @@ class PeaceBot(commands.Bot):
         self.prefix = prefix
 
         if load_extensions:
-            self.load_extensions(("bot.cogs.common", "bot.cogs.config"))
+            self.load_extensions(
+                (
+                    "bot.cogs.common",
+                    "bot.cogs.config",
+                    "bot.cogs.personal_guild",
+                    "bot.cogs.error",
+                    "bot.cogs.snipe",
+                    "bot.cogs.emoji",
+                    "bot.cogs.moderation",
+                    "bot.cogs.nsfw"
+                )
+            )
         if loadjsk:
             self.load_extension("jishaku")
 
@@ -83,19 +94,6 @@ class PeaceBot(commands.Bot):
                 self.load_extension(ext)
             except Exception as e:
                 traceback.print_exception(type(e), e, e.__traceback__)
-
-    async def on_command_error(
-        self, ctx: commands.Context, error: commands.CommandError
-    ):
-        if isinstance(error, commands.CommandNotFound):
-            return
-        if isinstance(error, commands.CommandInvokeError):
-            await super().on_command_error(ctx, error)
-            await ctx.send("Oopsy, something's broken")
-        title = " ".join(re.compile(r"[A-Z][a-z]*").findall(error.__class__.__name__))
-        await ctx.send(
-            embed=Embed(title=title, description=str(error), color=Color.red())
-        )
 
     async def on_ready(self):
         self.cog_watcher_task.start()
