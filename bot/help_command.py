@@ -5,6 +5,9 @@ from discord.ext import commands
 
 
 class HelpCommand(commands.HelpCommand):
+    def __init__(self):
+        super().__init__(show_hidden=False, verify_checks=True)
+
     def command_not_found(self, string: str) -> str:
         return f"I don't have the command `{string}`, if you have an idea for this use `suggest` command!"
 
@@ -28,20 +31,23 @@ class HelpCommand(commands.HelpCommand):
             description=f"Here's everything I can do!",
             color=Color.blue(),
         )
+
+        embed.set_footer(
+            text="Please keep in mind that these extensions are case sensitive!"
+        )
+
         for cog in self.context.bot.cogs.values():
-            # Removes Jishaku!
             if cog.qualified_name == "Jishaku":
                 continue
-            help_string = (
-                cog.__doc__ if cog.__doc__ is not None else "No help available"
-            )
             embed.add_field(
                 name=cog.qualified_name,
-                value=f"{help_string}\n`{self.clean_prefix}help {cog.qualified_name}`",
+                value=f"`{self.clean_prefix}help {cog.qualified_name}`",
             )
         await self.dispatch_help(embed)
 
     async def send_command_help(self, command: commands.Command) -> None:
+        if not await command.can_run(self.context):
+            raise self.command_not_found(command.name)
         embed = Embed(
             title=f"Help for command: `{command.name}`",
             description=f"Let me show you what the command {command.qualified_name} is all about!",
@@ -70,6 +76,7 @@ class HelpCommand(commands.HelpCommand):
         subcommand_help = [
             f"**`{self.get_command_signature(command)}`**\n{command.help}"
             for command in group.commands
+            if await command.can_run(self.context)
         ]
         newline = "\n"
         embed.add_field(
@@ -88,9 +95,20 @@ class HelpCommand(commands.HelpCommand):
         embed.add_field(
             name="What does this extension do?", value=cog.__doc__, inline=False
         )
-        for command in cog.walk_commands():
-            if command.parent is None:
-                embed.add_field(
-                    name=f"`{self.clean_prefix}{command.name}`", value=command.help
-                )
+        command = commands.Command
+
+        filtered_commands = await self.filter_commands(cog.walk_commands())
+
+        commands_in_cog = [
+            f"`{command.name}`"
+            for command in filtered_commands
+            if command.parent is None
+        ]
+
+        embed.add_field(
+            name="Commands:",
+            value=(", ".join(commands_in_cog))
+            if commands_in_cog
+            else "No Commands Found!",
+        )
         await self.dispatch_help(embed)

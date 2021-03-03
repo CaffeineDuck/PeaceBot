@@ -12,6 +12,8 @@ pyyaml = "*"
 asyncpraw = "*"
 pydantic = "*"
 black = "*"
+watchgod = "*"
+autopep8 = "*"
 
 [dev-packages]
 

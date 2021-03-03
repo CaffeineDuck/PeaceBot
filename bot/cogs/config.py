@@ -1,4 +1,5 @@
 import discord
+import os
 
 from discord.ext import commands
 from discord.ext.commands import BucketType
@@ -7,6 +8,11 @@ from models import GuildModel
 
 
 class Config(commands.Cog):
+    """
+    Configure the bot for your guild using the
+    commands in this extension.
+    """
+
     def __init__(self, bot):
         self.bot = bot
 

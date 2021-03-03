@@ -2,6 +2,11 @@ from discord import Color, Embed, NotFound
 from discord.ext import commands
 
 
+class MessageNotRefrenced(commands.CommandError):
+    def __str__(self):
+        return "Please reply to the valid message you want to re-run!"
+
+
 class Common(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -32,7 +37,7 @@ class Common(commands.Cog):
         """Reply to a message to rerun it if its a command, helps when you've made typos"""
         ref = ctx.message.reference
         if not ref:
-            return
+            raise MessageNotRefrenced()
         try:
             message = await ctx.channel.fetch_message(ref.message_id)
         except NotFound:

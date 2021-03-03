@@ -1,7 +1,9 @@
+import os
 import re
 import traceback
 from typing import List
 
+import watchgod
 from discord import Color, Embed, Intents, Member, Message
 from discord.ext import commands, tasks
 from tortoise import Tortoise
@@ -17,7 +19,7 @@ class PeaceBot(commands.Bot):
         tortoise_config: dict,
         prefix: str,
         load_extensions: bool = True,
-        loadjsk: bool = True
+        loadjsk: bool = True,
     ):
         super().__init__(
             command_prefix=self.determine_prefix,
@@ -36,7 +38,7 @@ class PeaceBot(commands.Bot):
     async def determine_prefix(self, bot: commands.Bot, message: Message) -> str:
         guild = message.guild
         if guild:
-            guild_model, _ = await GuildModel.get_or_create(id=message.guild.id)
+            guild_model = await GuildModel.from_guild_object(message.guild)
             return commands.when_mentioned_or(guild_model.prefix)(bot, message)
         else:
             return commands.when_mentioned_or(self.prefix)(bot, message)
@@ -47,17 +49,40 @@ class PeaceBot(commands.Bot):
         await Tortoise.init(self.tortoise_config)
         print("Database connected")
 
+    @tasks.loop(seconds=1)
+    async def cog_watcher_task(self) -> None:
+        """Watches the cogs directory for changes and reloads files"""
+        async for change in watchgod.awatch(
+            "bot/cogs", watcher_cls=watchgod.PythonWatcher
+        ):
+            for change_type, changed_file_path in change:
+                try:
+                    extension_name = changed_file_path.replace(os.path.sep, ".")[:-3]
+                    if len(extension_name) > 36 and extension_name[-33] == ".":
+                        continue
+                    if change_type == watchgod.Change.modified:
+                        try:
+                            self.unload_extension(extension_name)
+                        except commands.ExtensionNotLoaded:
+                            pass
+                        finally:
+                            self.load_extension(extension_name)
+                            print(f"AutoReloaded {extension_name}.")
+                    else:
+                        try:
+                            self.unload_extension(extension_name)
+                            print(f"AutoUnloaded {extension_name}.")
+                        except commands.ExtensionNotLoaded:
+                            pass
+                except (commands.ExtensionFailed, commands.NoEntryPointError) as e:
+                    traceback.print_exception(type(e), e, e.__traceback__)
+
     def load_extensions(self, extentions: List[str]):
         for ext in extentions:
             try:
                 self.load_extension(ext)
             except Exception as e:
                 traceback.print_exception(type(e), e, e.__traceback__)
-
-    async def on_message(self, msg: Message):
-        if msg.author.bot:
-            return
-        await self.process_commands(msg)
 
     async def on_command_error(
         self, ctx: commands.Context, error: commands.CommandError
@@ -73,4 +98,5 @@ class PeaceBot(commands.Bot):
         )
 
     async def on_ready(self):
+        self.cog_watcher_task.start()
         print("Ready!")

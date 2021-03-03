@@ -2,10 +2,16 @@ from tortoise import Model, fields
 from discord import Guild
 from discord.ext.commands import Context
 
+from config.bot import bot_config
+
 
 class GuildModel(Model):
     id = fields.BigIntField(pk=True, description="Discord ID of the guild")
-    prefix = fields.CharField(max_length=10, description="Custom prefix of the guild")
+    prefix = fields.CharField(
+        max_length=10,
+        default=bot_config.bot_prefix,
+        description="Custom prefix of the guild",
+    )
 
     @classmethod
     async def from_id(cls, guild_id: int):

@@ -10,4 +10,4 @@ class Settings(BaseSettings):
         fields = {"database_uri": {"env": ["database_uri", "database_url", "database"]}}
 
 
-config = Settings()
+common = Settings()
