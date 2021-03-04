@@ -34,6 +34,9 @@ class Moderation(commands.Cog):
     @cooldown(1, 10, BucketType.user)
     @has_permissions(manage_roles=True)
     async def mute(self, ctx: commands.Context, user: discord.Member = None):
+        """
+        Mutes the specified user
+        """
         role = discord.utils.get(
             ctx.guild.roles, name="Muted"
         ) or await self.create_muted_role(ctx)
@@ -49,6 +52,9 @@ class Moderation(commands.Cog):
     @has_permissions(manage_roles=True)
     @bot_has_permissions(manage_roles=True)
     async def unmute(self, ctx, user: discord.Member):
+        """
+        Unmutes the specified user
+        """
         role = discord.utils.get(ctx.guild.roles, name="Muted")
 
         embed = discord.Embed(
@@ -73,7 +79,6 @@ class Moderation(commands.Cog):
         """
         Kicks the user from the server
         """
-
         await user.kick(reason=reason)
         embed = discord.Embed(
             description=f"Reason: {reason}", color=discord.Color.red()
@@ -91,7 +96,7 @@ class Moderation(commands.Cog):
     @guild_only()
     @cooldown(1, 10, BucketType.user)
     @has_permissions(manage_messages=True)
-    @bot_has_guild_permissions(manage_messages=True)
+    @bot_has_permissions(manage_messages=True)
     async def purge_messages(self, ctx, num_messages: int = 10):
         """
         Delete messages from current channel
@@ -107,7 +112,7 @@ class Moderation(commands.Cog):
     @guild_only()
     @cooldown(1, 10, BucketType.user)
     @has_permissions(manage_channels=True)
-    @bot_has_guild_permissions(manage_channels=True)
+    @bot_has_permissions(manage_channels=True)
     async def lock_channel(self, ctx, channel: discord.TextChannel = None):
         """
         Makes typing in the channel unaccessible to everyone except for admins
@@ -126,7 +131,7 @@ class Moderation(commands.Cog):
     @guild_only()
     @cooldown(1, 10, BucketType.user)
     @has_permissions(manage_channels=True)
-    @bot_has_guild_permissions(manage_channels=True)
+    @bot_has_permissions(manage_channels=True)
     async def unlock_channel(self, ctx, channel: discord.TextChannel = None):
         """
         Makes the chat acessible to everyone as before locking

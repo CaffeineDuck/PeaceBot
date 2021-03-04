@@ -21,7 +21,6 @@ class NSFW(commands.Cog):
             "TooCuteForPorn",
             "Nudes",
             "cumsluts",
-            "porngifs",
             "hentai",
         )
         self.cache = RedditPostCacher(self.subreddits, "cache/NSFW.pickle")
@@ -69,31 +68,37 @@ class NSFW(commands.Cog):
     @commands.command()
     @commands.is_nsfw()
     async def ass(self, ctx):
+        """Booty Pics"""
         await self._reddit_sender(ctx, "ass", "DRUMS")
 
     @commands.command()
     @commands.is_nsfw()
     async def grool(self, ctx):
+        """Pussy juice yum"""
         await self._reddit_sender(ctx, "grool", "Dat Pussy Juice 😋")
 
     @commands.command()
     @commands.is_nsfw()
     async def teen(self, ctx):
+        """Pussy juice yum"""
         await self._reddit_sender(ctx, "LegalTeens", "You like them young?")
 
     @commands.command()
     @commands.is_nsfw()
     async def boobs(self, ctx):
+        """Pussy juice yum"""
         await self._reddit_sender(ctx, "boobs", "Bounce! Bounce!")
 
     @commands.command()
     @commands.is_nsfw()
     async def pussy(self, ctx):
+        """I like cats"""
         await self._reddit_sender(ctx, "pussy", "Wet or Dry?")
 
     @commands.command()
     @commands.is_nsfw()
     async def cutesluts(self, ctx):
+        """HMMM"""
         await self._reddit_sender(
             ctx, "TooCuteForPorn", "Too cute for porn, aren't they?"
         )
@@ -101,16 +106,19 @@ class NSFW(commands.Cog):
     @commands.command()
     @commands.is_nsfw()
     async def nudes(self, ctx):
+        """Porn industry == bad, real peps == nice"""
         await self._reddit_sender(ctx, "Nudes", "Sick of pornstars? Me too!")
 
     @commands.command(aliases=["cumsluts"])
     @commands.is_nsfw()
     async def cum(self, ctx):
+        """I am ~~cumming~~ coming"""
         await self._reddit_sender(ctx, "cumsluts", "And they don't stop cumming!")
 
     @commands.command()
     @commands.is_nsfw()
     async def hentai(self, ctx):
+        """When I die, don't cry, just look at the sky and say `I love hentai`"""
         await self._reddit_sender(ctx, "hentai", "AnImE iS jUsT CaRtOoN")
 
 

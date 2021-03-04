@@ -1,6 +1,8 @@
 from discord import Color, Embed, NotFound
 from discord.ext import commands
 
+from models import GuildModel
+
 
 class MessageNotRefrenced(commands.CommandError):
     def __str__(self):
@@ -34,7 +36,9 @@ class Core(commands.Cog):
 
     @commands.command(aliases=["re"])
     async def redo(self, ctx: commands.Context):
-        """Reply to a message to rerun it if its a command, helps when you've made typos"""
+        """
+        Reply to a message to rerun it if its a command, helps when you've made typos
+        """
         ref = ctx.message.reference
         if not ref:
             raise MessageNotRefrenced()
@@ -45,6 +49,20 @@ class Core(commands.Cog):
         if message.author != ctx.author:
             return
         await self.bot.process_commands(message)
+
+    @commands.command()
+    @commands.guild_only()
+    async def prefix(self, ctx: commands.Context):
+        """
+        Use this command to find out the prefix of this bot in your guild
+        """
+        guild = await GuildModel.from_context(ctx)
+        prefix = guild.prefix
+        embed = Embed(
+            color=Color.blue(),
+            description=f"{ctx.author.mention}, My current prefix is `{prefix}` or {self.bot.user.mention}",
+        )
+        await ctx.send(embed=embed)
 
 
 def setup(bot: commands.Bot):
