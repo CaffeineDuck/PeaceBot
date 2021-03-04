@@ -31,11 +31,13 @@ class AutoResponses(commands.Cog):
             return
 
         # Loops through all the custom autoresponses (GUILD SPECIFIC)
-        autoresponses = await AutoResponseModel.filter(guild__id=msg.guild.id)
+        guild = await GuildModel.from_guild_object(msg.guild)
+        autoresponses = await AutoResponseModel.filter(guild=guild)
         ctx: commands.Context = await self.bot.get_context(msg)
         for data in autoresponses:
             if data.is_command:
-                if (ctx.prefix + data.trigger) == msg.content:
+                try:
+                if (guild.prefix + data.trigger) == msg.content:
                     await msg.channel.send(data.response)
                     return
             elif msg.content.lower() == data.trigger:
