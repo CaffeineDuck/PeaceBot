@@ -13,6 +13,7 @@ asyncpraw = "*"
 pydantic = "*"
 watchgod = "*"
 autopep8 = "*"
+"akinator.py" = "*"
 
 [dev-packages]
 

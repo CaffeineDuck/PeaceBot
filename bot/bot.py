@@ -45,6 +45,9 @@ class PeaceBot(commands.Bot):
                     "bot.cogs.moderation",
                     "bot.cogs.nsfw",
                     "bot.cogs.autoresponse",
+                    "bot.cogs.games",
+                    "bot.cogs.fun",
+                    "bot.cogs.misc"
                 )
             )
         if loadjsk:

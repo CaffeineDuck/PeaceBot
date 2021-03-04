@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "54ffa36284acbc7631392fcfd71813e7b9a0d817af415a8f2dedc336f5961563"
+            "sha256": "3ee76f4091707eca9b51cf768aee22613856381e1eeb20dcec296ef41aa0fb8e"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -79,6 +79,14 @@
                 "sha256:2e915463164efa65b60fd1901aceca829b6090082f03082618afca6fb9c8fdf7"
             ],
             "version": "==0.16.1"
+        },
+        "akinator.py": {
+            "hashes": [
+                "sha256:3bc3bf734d32af4d56e476dba5a09905342b0fba3f0dd00bc34ad9ecea66e4c0",
+                "sha256:cf2c2663891ea84be373da9ca61315801d6461f1dd64f9d179fb5fecb5c63e7f"
+            ],
+            "index": "pypi",
+            "version": "==4.1.0"
         },
         "astunparse": {
             "hashes": [

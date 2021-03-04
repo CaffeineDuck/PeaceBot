@@ -25,8 +25,10 @@ class PersonalGuild(commands.Cog):
 
     @commands.command()
     @commands.check(is_personal_guild)
-    async def lol(self, ctx):
-        await ctx.send("hi")
+    async def gn(self, ctx: commands.Context, user: discord.Member = None):
+        """Goodnight Command"""
+        user = user or ctx.author
+        await ctx.send(f"Get Naked {user.mention}")
 
 
 def setup(bot: commands.Bot):
