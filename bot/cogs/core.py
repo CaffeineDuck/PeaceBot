@@ -7,7 +7,7 @@ class MessageNotRefrenced(commands.CommandError):
         return "Please reply to the valid message you want to re-run!"
 
 
-class Common(commands.Cog):
+class Core(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -48,4 +48,4 @@ class Common(commands.Cog):
 
 
 def setup(bot: commands.Bot):
-    bot.add_cog(Common(bot))
+    bot.add_cog(Core(bot))

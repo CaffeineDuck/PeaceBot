@@ -36,7 +36,7 @@ class PeaceBot(commands.Bot):
         if load_extensions:
             self.load_extensions(
                 (
-                    "bot.cogs.common",
+                    "bot.cogs.core",
                     "bot.cogs.config",
                     "bot.cogs.personal_guild",
                     "bot.cogs.error",
