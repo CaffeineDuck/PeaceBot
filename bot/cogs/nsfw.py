@@ -22,6 +22,7 @@ class NSFW(commands.Cog):
             "Nudes",
             "cumsluts",
             "hentai",
+            "grool"
         )
         self.cache = RedditPostCacher(self.subreddits, "cache/NSFW.pickle")
         self.cache.cache_posts.start()
