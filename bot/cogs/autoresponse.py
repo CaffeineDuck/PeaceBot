@@ -31,17 +31,9 @@ class AutoResponses(commands.Cog):
             return
 
         # Loops through all the custom autoresponses (GUILD SPECIFIC)
-        guild = await GuildModel.from_guild_object(msg.guild)
-        autoresponses = await AutoResponseModel.filter(guild=guild)
+        autoresponses = await AutoResponseModel.filter(guild__id=msg.guild.id)
         for data in autoresponses:
-            if data.is_command:
-                try:
-                    if guild.prefix + data.trigger == msg.content:
-                        await msg.channel.send(data.response)
-                        return
-                except TypeError:
-                    pass
-            elif msg.content.lower() == data.trigger:
+            if msg.content.lower() == data.trigger:
                 await msg.channel.send(data.response)
                 return
 
@@ -97,12 +89,6 @@ class AutoResponses(commands.Cog):
         prompts = [
             Prompt("Triggered With", description="What shall be the trigger?"),
             Prompt("Reacts With", description="What shall be the response?"),
-            Prompt(
-                "Is Command",
-                description="Should the autoresponse only be usable after using prefix?",
-                out_type=bool,
-                reaction_interface=True,
-            ),
         ]
 
         wizard = Wizard(
@@ -114,16 +100,15 @@ class AutoResponses(commands.Cog):
             confirm_prompt=True,
         )
 
-        trigger, response, is_command = await wizard.run(ctx.channel)
+        trigger, response = await wizard.run(ctx.channel)
 
         record, _ = await AutoResponseModel.get_or_create(
             guild=guild, trigger=trigger.lower()
         )
         record.enabled = True
         record.response = response
-        record.is_command = is_command
 
-        await record.save(update_fields=["enabled", "response", "is_command"])
+        await record.save(update_fields=["enabled", "response"])
 
     @autoresponse.command(name="delete", aliases=["delresponse", "del"])
     @commands.has_permissions(administrator=True)
@@ -185,6 +170,7 @@ class AutoResponses(commands.Cog):
             value=enabled_autoresponses
             if enabled_autoresponses
             else "There are no enabled autoresponses in this server!",
+            inline=False,
         )
 
         if disabled_autoresponses:

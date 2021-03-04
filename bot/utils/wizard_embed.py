@@ -44,7 +44,7 @@ class Wizard:
         commander: Member,
         prompts: List[Prompt],
         title: str,
-        embed_color=0xf1c40f,
+        embed_color=0xF1C40F,
         completed_message: str = "Wizard Complete",
         return_dict: bool = False,
         confirm_prompt: bool = False,

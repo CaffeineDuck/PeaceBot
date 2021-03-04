@@ -1,5 +1,6 @@
 import os
 import re
+import logging
 import traceback
 from typing import List
 
@@ -10,6 +11,8 @@ from tortoise import Tortoise
 
 from models import GuildModel
 from bot.help_command import HelpCommand
+
+logging.basicConfig(level=logging.INFO)
 
 
 class PeaceBot(commands.Bot):
@@ -93,9 +96,11 @@ class PeaceBot(commands.Bot):
         for ext in extentions:
             try:
                 self.load_extension(ext)
+                print(f"Loaded {ext}")
             except Exception as e:
                 traceback.print_exception(type(e), e, e.__traceback__)
 
     async def on_ready(self):
+        print(f"Logged in as {self.user.name}#{self.user.discriminator}")
         self.cog_watcher_task.start()
-        print("Ready!")
+        print("Ready")
