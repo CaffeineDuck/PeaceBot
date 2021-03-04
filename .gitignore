@@ -3,3 +3,8 @@
 /migrations
 /cache/**.**
 **/**/__pycache__
+
+/Pipfile_a
+Pipfile_a.lock
+Procfile_a
+runtime_a.txt
