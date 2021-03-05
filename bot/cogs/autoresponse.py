@@ -31,7 +31,7 @@ class AutoResponses(commands.Cog):
             return
 
         # Loops through all the custom autoresponses (GUILD SPECIFIC)
-        autoresponses = await AutoResponseModel.filter(guild__id=msg.guild.id)
+        autoresponses = await AutoResponseModel.filter(guild__id=msg.guild.id, enabled=True)
         for data in autoresponses:
             if msg.content.lower() == data.trigger:
                 await msg.channel.send(data.response)
