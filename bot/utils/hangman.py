@@ -3,8 +3,7 @@ from discord.ext.commands import BucketType
 import random
 from random import shuffle
 
-BOARD = \
-    """\
+BOARD = """\
 ```
 _______
 |     |
@@ -17,29 +16,13 @@ _______
 """
 
 
-class Hanger():
+class Hanger:
     def __init__(self):
         self.lives = 7
         self.current_part = 1
         self.board = BOARD
-        self.parts = {
-            1: 'o',
-            2: '/',
-            3: '|',
-            4: '\\',
-            5: '|',
-            6: '/',
-            7: '\\'
-        }
-        self.current_parts = {
-            1: ' ',
-            2: ' ',
-            3: ' ',
-            4: ' ',
-            5: ' ',
-            6: ' ',
-            7: ' '
-        }
+        self.parts = {1: "o", 2: "/", 3: "|", 4: "\\", 5: "|", 6: "/", 7: "\\"}
+        self.current_parts = {1: " ", 2: " ", 3: " ", 4: " ", 5: " ", 6: " ", 7: " "}
 
     async def get_board(self):
         cp = self.current_parts
@@ -51,7 +34,7 @@ class Hanger():
         self.current_part += 1
 
 
-class HangMan():
+class HangMan:
     def __init__(self, members, bot, channel):
         self.members = members
         self.bot = bot
@@ -67,12 +50,14 @@ class HangMan():
     async def play(self):
         await self._initialize()
         if self.going:
-            await self._send_to_all(self.guessers + [self.phraser], "The game has started!")
+            await self._send_to_all(
+                self.guessers + [self.phraser], "The game has started!"
+            )
             await self.channel.send("The game has started!")
         last_choice = -1
         while self.going:
             last_choice += 1
-            if last_choice > len(self.guessers)-1:
+            if last_choice > len(self.guessers) - 1:
                 last_choice = 0
             await self.channel.send(await self.show_board())
             round_guesser = self.guessers[last_choice]
@@ -80,17 +65,23 @@ class HangMan():
 
             if self.hanger.lives == 0:
                 await self.channel.send(await self.show_board())
-                await self._send_to_all(self.guessers + [self.phraser, self.channel], f"The man was hung, so the phraser, {self.phraser.mention}, wins!")
+                await self._send_to_all(
+                    self.guessers + [self.phraser, self.channel],
+                    f"The man was hung, so the phraser, {self.phraser.mention}, wins!",
+                )
                 await self.channel.send(f"The phrase was **{''.join(self.phrase)}**")
                 return
 
             found = False
             for char in self.guessed_phrase:
-                if char == '-':
+                if char == "-":
                     found = True
             if not found:
                 await self.channel.send(await self.show_board())
-                await self._send_to_all(self.guessers + [self.phraser, self.channel], f"{round_guesser.mention} wins!")
+                await self._send_to_all(
+                    self.guessers + [self.phraser, self.channel],
+                    f"{round_guesser.mention} wins!",
+                )
                 return
 
     async def show_board(self):
@@ -100,7 +91,7 @@ class HangMan():
         return to_send
 
     async def get_guessed_phrase(self):
-        current_phrase = ''
+        current_phrase = ""
         for char in self.guessed_phrase:
             current_phrase += char
         return current_phrase
@@ -109,22 +100,29 @@ class HangMan():
         def check(msg):
             if msg.author.id != member.id:
                 return False
-            if msg.content not in ['1', '2']:
+            if msg.content not in ["1", "2"]:
                 return False
             if msg.channel.id != self.channel.id:
                 return False
             return True
-        await self.channel.send(f"{member.mention}, It's your turn to choose! Do you want to (1) guess a letter or (2) guess the phrase?")
+
+        await self.channel.send(
+            f"{member.mention}, It's your turn to choose! Do you want to (1) guess a letter or (2) guess the phrase?"
+        )
         try:
-            choice = await self.bot.wait_for('message', check=check, timeout=120)
+            choice = await self.bot.wait_for("message", check=check, timeout=120)
         except asyncio.TimeoutError:
-            await self.channel.send(f"Due to lack of response, {member.mention} has been removed from the game.")
+            await self.channel.send(
+                f"Due to lack of response, {member.mention} has been removed from the game."
+            )
             self.guessers.remove(member)
             if len(self.guessers) < 1:
-                await self.channel.send(f"There are no more guessers, so the game ends, and the phraser, {self.phraser.mention}, wins!")
+                await self.channel.send(
+                    f"There are no more guessers, so the game ends, and the phraser, {self.phraser.mention}, wins!"
+                )
                 self.going = False
                 return
-        if choice.content == '1':
+        if choice.content == "1":
             await self._guess_letter(member)
         else:
             await self._guess_phrase(member)
@@ -138,17 +136,22 @@ class HangMan():
             if msg.channel.id != self.channel.id:
                 return False
             return True
+
         try:
-            msg = await self.bot.wait_for('message', check=check, timeout=180)
+            msg = await self.bot.wait_for("message", check=check, timeout=180)
             if len(msg.content) != len(self.phrase):
-                await self.channel.send("That's not the same length as the actual phrase. Make sure to include special chars like '.")
+                await self.channel.send(
+                    "That's not the same length as the actual phrase. Make sure to include special chars like '."
+                )
                 return await self.get_guess(member)
         except asyncio.TimeoutError:
-            await self.channel.send("You will be skipped this round because you didn't respond")
+            await self.channel.send(
+                "You will be skipped this round because you didn't respond"
+            )
             return
 
         guess = msg.content.lower()
-        if guess == ''.join(self.phrase):
+        if guess == "".join(self.phrase):
             await self.channel.send("Correct!")
             self.guessed_phrase = self.phrase
         else:
@@ -168,10 +171,13 @@ class HangMan():
             if msg.channel.id != self.channel.id:
                 return False
             return True
+
         try:
-            msg = await self.bot.wait_for('message', check=check, timeout=60)
+            msg = await self.bot.wait_for("message", check=check, timeout=60)
         except asyncio.TimeoutError:
-            await self.channel.send(f"You will be skiped this round because you didn't respond")
+            await self.channel.send(
+                f"You will be skiped this round because you didn't respond"
+            )
 
         guess = msg.content.lower()
         if guess in self.guessed_chars:
@@ -192,8 +198,13 @@ class HangMan():
         self.phraser = self.members.pop()
         self.guessers = self.members
 
-        await self._send_to_all(self.guessers, f"You are a guesser! Please wait while {self.phraser.mention} chooses a phrase.")
-        await self.phraser.send(f"You are the phraser! Please choose a phrase for other people to guess.\nIt must be less than 32 characters.")
+        await self._send_to_all(
+            self.guessers,
+            f"You are a guesser! Please wait while {self.phraser.mention} chooses a phrase.",
+        )
+        await self.phraser.send(
+            f"You are the phraser! Please choose a phrase for other people to guess.\nIt must be less than 32 characters."
+        )
         await self._get_phrase()
 
     async def _get_phrase(self):
@@ -203,11 +214,14 @@ class HangMan():
             if msg.guild is not None:
                 return False
             return True
+
         try:
-            msg = await self.bot.wait_for('message', check=check, timeout=120)
+            msg = await self.bot.wait_for("message", check=check, timeout=120)
         except asyncio.TimeoutError:
             await self.phraser.send("You didn't choose a phrase, so the game ended.")
-            await self.channel.send("The phraser didn't choose a phrase, so the game ended.")
+            await self.channel.send(
+                "The phraser didn't choose a phrase, so the game ended."
+            )
             self.going = False
             return
         phrase = msg.content.lower()
@@ -222,7 +236,7 @@ class HangMan():
             if char not in [c for c in string.ascii_letters]:
                 self.guessed_phrase += char
             else:
-                self.guessed_phrase += '-'
+                self.guessed_phrase += "-"
         return True
 
     async def _send_to_all(self, mlist, msg):

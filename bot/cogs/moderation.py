@@ -113,7 +113,9 @@ class Moderation(commands.Cog):
     @cooldown(1, 10, BucketType.user)
     @has_permissions(manage_channels=True)
     @bot_has_permissions(manage_channels=True)
-    async def lock_channel(self, ctx, channel: discord.TextChannel = None):
+    async def lock_channel(
+        self, ctx: commands.Context, channel: discord.TextChannel = None
+    ):
         """
         Makes typing in the channel unaccessible to everyone except for admins
         """
@@ -123,16 +125,23 @@ class Moderation(commands.Cog):
             ctx.guild.default_role: discord.PermissionOverwrite(send_messages=False)
         }
         await channel.edit(overwrites=overwrites)
-        await ctx.send(
-            "**The channel `{ctx.channel.name}` has successfully been locked!**"
-        )
+        try:
+            await ctx.send(
+                f"**The channel {channel.mention} has successfully been locked!**"
+            )
+        except discord.Forbidden:
+            await ctx.author.send(
+                f"**The channel {channel.mention} has successfully been locked!**"
+            )
 
     @command(name="unlock")
     @guild_only()
     @cooldown(1, 10, BucketType.user)
     @has_permissions(manage_channels=True)
     @bot_has_permissions(manage_channels=True)
-    async def unlock_channel(self, ctx, channel: discord.TextChannel = None):
+    async def unlock_channel(
+        self, ctx: commands.Context, channel: discord.TextChannel = None
+    ):
         """
         Makes the chat acessible to everyone as before locking
         """
@@ -143,7 +152,7 @@ class Moderation(commands.Cog):
         }
         await channel.edit(overwrites=overwrites)
         await ctx.send(
-            "**The channel `{channel.name}` has successfully been unlocked!**"
+            f"**The channel {channel.mention} has successfully been unlocked!**"
         )
 
 

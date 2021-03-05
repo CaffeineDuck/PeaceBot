@@ -3,10 +3,21 @@ from typing import Mapping, Optional, List
 from discord import Embed, Color
 from discord.ext import commands
 
+INVISIBLE_COGS = ["ErrorHandler", "Jishaku", "PersonalGuild"]
+
+NSFW_COGS = ["NSFW"]
+
 
 class HelpCommand(commands.HelpCommand):
     def __init__(self):
         super().__init__(show_hidden=False, verify_checks=True)
+
+    async def nsfw_cog_checker(self, cog: commands.Cog):
+        if cog.qualified_name in NSFW_COGS:
+            if self.context.channel.is_nsfw():
+                return True
+            return False
+        return True
 
     def command_not_found(self, string: str) -> str:
         return f"I don't have the command `{string}`, if you have an idea for this use `suggest` command!"
@@ -37,7 +48,9 @@ class HelpCommand(commands.HelpCommand):
         )
 
         for cog in self.context.bot.cogs.values():
-            if cog.qualified_name == "Jishaku":
+            if cog.qualified_name in INVISIBLE_COGS or not await self.nsfw_cog_checker(
+                cog
+            ):
                 continue
             embed.add_field(
                 name=cog.qualified_name,

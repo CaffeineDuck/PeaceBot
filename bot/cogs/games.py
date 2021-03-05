@@ -16,9 +16,9 @@ class Games(commands.Cog):
     """
     # Map integer value to emoji to send in discord
     INT_TO_EMOJI = {
-        -1: ':regional_indicator_o:',
-        0: ':stop_button:',
-        1: ':regional_indicator_x:'
+        -1: ":regional_indicator_o:",
+        0: ":stop_button:",
+        1: ":regional_indicator_x:",
     }
 
     def create_embed(self, game_state: List[List[int]], status: str):
@@ -26,8 +26,9 @@ class Games(commands.Cog):
         Creates the game embed when given gamestate and status string
         """
         game = Embed(title="Tic-Tac-Toe", color=Color.blurple())
-        game_str = "\n".join(["".join([self.INT_TO_EMOJI[i] for i in line])
-                              for line in game_state])
+        game_str = "\n".join(
+            ["".join([self.INT_TO_EMOJI[i] for i in line]) for line in game_state]
+        )
 
         game.add_field(name="GameBoard", value=game_str, inline=False)
         game.add_field(name="Status", value=status, inline=False)
@@ -46,7 +47,7 @@ class Games(commands.Cog):
                 return True
 
         for i in range(3):
-            col_sum = game_state[0][i]+game_state[1][i]+game_state[2][i]
+            col_sum = game_state[0][i] + game_state[1][i] + game_state[2][i]
             if col_sum == -3 or col_sum == 3:
                 return True
 
@@ -59,7 +60,7 @@ class Games(commands.Cog):
         return False
 
     @commands.command(name="noughts", aliases=["tictactoe"])
-    async def noughts_game(self, ctx: commands.Context, player: discord.Member):
+    async def noughts_game(self, ctx: commands.Context, player2: Member):
         """
         Play noughts/tic-tac-toe with your friends!
         """
@@ -69,8 +70,7 @@ class Games(commands.Cog):
 
         game_state = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
 
-        game = self.create_embed(
-            game_state, f"Current move: {current_player.name}")
+        game = self.create_embed(game_state, f"Current move: {current_player.name}")
 
         game_msg = await ctx.send(embed=game)
 
@@ -91,7 +91,7 @@ class Games(commands.Cog):
             if move_box < 0 or move_box > 8:
                 return False
             # Get row and column number
-            row = move_box//3
+            row = move_box // 3
             col = move_box % 3
             # If that target position is not 0 then do nothing
             if game_state[row][col]:
@@ -104,9 +104,13 @@ class Games(commands.Cog):
 
         for i in range(9):
             try:
-                m = await self.bot.wait_for('message', check=check, timeout=30)
+                m = await self.bot.wait_for("message", check=check, timeout=30)
             except asyncio.TimeoutError:
-                await game_msg.edit(embed=self.create_embed(gamestate, f"{current_player.name} failed to move"))
+                await game_msg.edit(
+                    embed=self.create_embed(
+                        gamestate, f"{current_player.name} failed to move"
+                    )
+                )
                 return
             else:
                 # Delete the message sent by the user
@@ -114,31 +118,32 @@ class Games(commands.Cog):
                 game_over = self.is_game_over(game_state)
                 # End if game is over
                 if game_over:
-                    game = self.create_embed(
-                        game_state, f"{current_player.name} won!")
+                    game = self.create_embed(game_state, f"{current_player.name} won!")
                     await game_msg.edit(embed=game)
                     return
 
-                current_player = player1 if current_player == player else player
+                current_player = player1 if current_player == player2 else player2
                 game = self.create_embed(
-                    game_state, f"Current move: {current_player.name}")
+                    game_state, f"Current move: {current_player.name}"
+                )
                 await game_msg.edit(embed=game)
 
         await game_msg.edit(embed=self.create_embed(game_state, "It's a draw!"))
-
 
     """
     HangMan
     """
 
-    @commands.command(name='hangman')
+    @commands.command(name="hangman")
     @commands.guild_only()
     async def start_hangman(self, ctx: commands.Context):
         """
         Play Hangman with your friends
         """
-        game_msg = await ctx.channel.send(f"{ctx.message.author} has opened a game of hangman! React below to join. {ctx.message.author.mention}, the game will start when you type \"start game\"")
-        await game_msg.add_reaction('✅')
+        game_msg = await ctx.channel.send(
+            f'{ctx.message.author} has opened a game of hangman! React below to join. {ctx.message.author.mention}, the game will start when you type "start game"'
+        )
+        await game_msg.add_reaction("✅")
 
         async def wait_for_game_start():
             def check(msg):
@@ -151,10 +156,10 @@ class Games(commands.Cog):
                 return True
 
             try:
-                msg = await self.bot.wait_for('message', check=check, timeout=600)
+                msg = await self.bot.wait_for("message", check=check, timeout=600)
             except asyncio.TimeoutError:
                 await ctx.send("Game timed out")
-            if msg.content.lower() == 'cancel':
+            if msg.content.lower() == "cancel":
                 await ctx.send("Game Cancelled")
                 return []
             users = set()
@@ -166,7 +171,9 @@ class Games(commands.Cog):
             users.add(ctx.message.author.id)
             num_users = len(users)
             if num_users < 2:
-                await ctx.send(f"There are not enough people to play. Minimum is 2, and you only have {num_users}.")
+                await ctx.send(
+                    f"There are not enough people to play. Minimum is 2, and you only have {num_users}."
+                )
                 return await wait_for_game_start()
             return users
 
@@ -182,6 +189,6 @@ class Games(commands.Cog):
         game = HangMan(members, self.bot, ctx.channel)
         await game.play()
 
-    
+
 def setup(bot: commands.Bot):
     bot.add_cog(Games(bot))
