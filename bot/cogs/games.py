@@ -59,7 +59,7 @@ class Games(commands.Cog):
         return False
 
     @commands.command(name="noughts", aliases=["tictactoe"])
-    async def noughts_game(self, ctx: commands.Context, player2: Member):
+    async def noughts_game(self, ctx: commands.Context, player: discord.Member):
         """
         Play noughts/tic-tac-toe with your friends!
         """
@@ -119,7 +119,7 @@ class Games(commands.Cog):
                     await game_msg.edit(embed=game)
                     return
 
-                current_player = player1 if current_player == player2 else player2
+                current_player = player1 if current_player == player else player
                 game = self.create_embed(
                     game_state, f"Current move: {current_player.name}")
                 await game_msg.edit(embed=game)
@@ -133,7 +133,7 @@ class Games(commands.Cog):
 
     @commands.command(name='hangman')
     @commands.guild_only()
-    async def start_hangman(self, ctx):
+    async def start_hangman(self, ctx: commands.Context):
         """
         Play Hangman with your friends
         """
