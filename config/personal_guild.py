@@ -3,7 +3,6 @@ from pydantic import BaseSettings
 
 class PersonalGuild(BaseSettings):
     id: int
-    message_id: int
 
     class Config:
         env_file = ".env"
