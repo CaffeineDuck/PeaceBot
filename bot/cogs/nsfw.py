@@ -7,7 +7,7 @@ import asyncpraw
 import discord
 from discord.ext import commands, tasks
 
-from bot.utils.cached_reddit import RedditPostCacher
+from utils.cached_reddit import RedditPostCacher
 
 
 class NSFW(commands.Cog):

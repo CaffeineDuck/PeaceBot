@@ -1,9 +1,12 @@
+from typing import Union
+
 import discord
 from discord.ext import commands
 from discord.ext.commands import BucketType
 
 from models import AutoResponseModel, GuildModel
-from bot.utils.wizard_embed import Prompt, Wizard
+from utils.wizard_embed import Wizard, Prompt
+from config.personal_guild import personal_guild
 
 
 class AutoResponseDoesNotExist(commands.CommandError):
@@ -16,13 +19,42 @@ class AutoResponses(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.defualt_responses = ["imagine"]
 
-    # Checks if the autoresponse is enabled and exists in that server!
-    async def commands_checker(self, command, guild_id):
+    async def commands_checker(self, command: str, guild_id: int) -> bool:
+        """Checks if the autoresponse is enabled and exists in that server!
+
+        Args:
+                        command (str): Command for the autoresponse
+                        guild_id (int): Id of the guild
+
+        Returns:
+                        bool: Autoresponse exists and is enabled in that guild
+        """
         return await AutoResponseModel.exists(
             guild__id=guild_id, trigger=command, enabled=True
         )
+
+    async def autoresponse_message_formatter(self, message: discord.Message, response: str) -> str:
+        """Formats the string to a valid message
+
+        Args:
+            message (str): Message object to format the string
+            response (str): String to format using `message (str)`
+
+        Returns:
+            str: Converted string
+
+        Raises:
+            KeyError, AttributeError
+        """
+        message_content = ' '.join(message.content.split(' ')[1:])
+        updated_message = response.format(
+            author=message.author,
+            message=message_content,
+            raw_message=message,
+            server=message.guild,
+        )
+        return updated_message
 
     # On message listner to give the autoresponse if it matches the trigger!
     @commands.Cog.listener()
@@ -31,20 +63,13 @@ class AutoResponses(commands.Cog):
             return
 
         # Loops through all the custom autoresponses (GUILD SPECIFIC)
-        autoresponses = await AutoResponseModel.filter(guild__id=msg.guild.id, enabled=True)
+        autoresponses = await AutoResponseModel.filter(
+            guild__id=msg.guild.id, enabled=True
+        )
         for data in autoresponses:
-            if msg.content.lower() == data.trigger:
-                await msg.channel.send(data.response)
+            if msg.content.split(' ')[0].lower() == data.trigger:
+                await msg.channel.send(await self.autoresponse_message_formatter(msg, data.response))
                 return
-
-        # It checks the if the prebaked autoresponses are enabled in that server!
-        try:
-            if "imagine" in msg.content.split()[0] and await self.commands_checker(
-                "imagine", msg.guild.id
-            ):
-                await msg.channel.send(f"I can't even {msg.content}, bro!")
-        except IndexError:
-            pass
 
     @commands.group(aliases=["autoresponses"])
     @commands.guild_only()
@@ -54,19 +79,11 @@ class AutoResponses(commands.Cog):
         if not ctx.invoked_subcommand:
             await ctx.send_help(ctx.command)
 
-    @autoresponse.command(aliases=["change"])
-    async def toggle(self, ctx: commands.Context, trigger: str, is_enabled: bool):
+    @autoresponse.command(name="toggle", aliases=["change"])
+    async def autoresponse_toggle(
+        self, ctx: commands.Context, trigger: str, is_enabled: bool
+    ):
         """Enable/ Disable an autoresponse!"""
-
-        if trigger.lower() in self.defualt_responses:
-            record = (
-                await AutoResponseModel.get_or_create(
-                    guild__id=ctx.guild.id, trigger=trigger
-                )
-            )[0]
-            record.enabled = is_enabled
-            await record.save(update_fields=["enabled"])
-
         # Checks if the trigger and response exists in that guild and works accordingly!
         record = await AutoResponseModel.get_or_none(
             guild__id=ctx.guild.id, trigger=trigger
@@ -88,7 +105,11 @@ class AutoResponses(commands.Cog):
         guild = await GuildModel.from_context(ctx)
         prompts = [
             Prompt("Triggered With", description="What shall be the trigger?"),
-            Prompt("Reacts With", description="What shall be the response?"),
+            Prompt(
+                "Reacts With",
+                description="What shall be the response?",
+                out_type=str,
+            ),
         ]
 
         wizard = Wizard(

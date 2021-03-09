@@ -19,7 +19,7 @@ class PersonalGuild(commands.Cog):
         self.bot = bot
 
     def is_personal_guild(ctx: commands.Context):
-        if ctx.guild.id == personal_guild.id:
+        if ctx.guild.id == personal_guild.guild_id:
             return True
         raise NotPersonalGuild()
 

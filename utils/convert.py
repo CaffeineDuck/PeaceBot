@@ -70,8 +70,7 @@ type_to_converter = {
 }
 
 _to_str = {
-    Message: lambda m: f"Message starting with {escape_mentions(escape_markdown(m.content))[:25]} in {m.channel.mention}",
-    # TextChannel: lambda c: c.mention,
+    Message: lambda m: f"Message with id {m.id} in {m.channel.mention}",
 }
 
 
