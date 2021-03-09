@@ -34,7 +34,9 @@ class AutoResponses(commands.Cog):
             guild__id=guild_id, trigger=command, enabled=True
         )
 
-    async def autoresponse_message_formatter(self, message: discord.Message, response: str) -> str:
+    async def autoresponse_message_formatter(
+        self, message: discord.Message, response: str
+    ) -> str:
         """Formats the string to a valid message
 
         Args:
@@ -47,7 +49,7 @@ class AutoResponses(commands.Cog):
         Raises:
             KeyError, AttributeError
         """
-        message_content = ' '.join(message.content.split(' ')[1:])
+        message_content = " ".join(message.content.split(" ")[1:])
         updated_message = response.format(
             author=message.author,
             message=message_content,
@@ -67,8 +69,10 @@ class AutoResponses(commands.Cog):
             guild__id=msg.guild.id, enabled=True
         )
         for data in autoresponses:
-            if msg.content.split(' ')[0].lower() == data.trigger:
-                await msg.channel.send(await self.autoresponse_message_formatter(msg, data.response))
+            if msg.content.split(" ")[0].lower() == data.trigger:
+                await msg.channel.send(
+                    await self.autoresponse_message_formatter(msg, data.response)
+                )
                 return
 
     @commands.group(aliases=["autoresponses"])
