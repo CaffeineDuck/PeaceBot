@@ -5,7 +5,7 @@ from discord.ext import commands
 from discord.ext.commands import BucketType
 
 from models import AutoResponseModel, GuildModel
-from utils.wizard_embed import Wizard, Prompt
+from utils.wizard_embed import Prompt, Wizard
 from config.personal_guild import personal_guild
 
 
@@ -24,11 +24,11 @@ class AutoResponses(commands.Cog):
         """Checks if the autoresponse is enabled and exists in that server!
 
         Args:
-                        command (str): Command for the autoresponse
-                        guild_id (int): Id of the guild
+            command (str): Command for the autoresponse
+            guild_id (int): Id of the guild
 
         Returns:
-                        bool: Autoresponse exists and is enabled in that guild
+            bool: Autoresponse exists and is enabled in that guild
         """
         return await AutoResponseModel.exists(
             guild__id=guild_id, trigger=command, enabled=True
@@ -68,12 +68,23 @@ class AutoResponses(commands.Cog):
         autoresponses = await AutoResponseModel.filter(
             guild__id=msg.guild.id, enabled=True
         )
-        for data in autoresponses:
-            if msg.content.split(" ")[0].lower() == data.trigger:
-                await msg.channel.send(
-                    await self.autoresponse_message_formatter(msg, data.response)
-                )
-                return
+
+        #Gets the first autoresponse object if the sent message is an autoresponse trigger
+        filtered_autoresponse = ([autoresponse for autoresponse in autoresponses if autoresponse.trigger == msg.content.split(" ")[0].lower()])[0]
+
+        if not filtered_autoresponse:
+            return
+        
+        if filtered_autoresponse.extra_arguements:
+            output = await self.autoresponse_message_formatter(
+                msg, filtered_autoresponse.response
+            )
+        elif filtered_autoresponse.trigger == msg.content:
+            output = filtered_autoresponse.response
+        else:
+            return
+
+        await msg.channel.send(output)
 
     @commands.group(aliases=["autoresponses"])
     @commands.guild_only()
@@ -112,7 +123,12 @@ class AutoResponses(commands.Cog):
             Prompt(
                 "Reacts With",
                 description="What shall be the response?",
-                out_type=str,
+            ),
+            Prompt(
+                "Extra arguements",
+                description="Should the autoresponse be triggered even when there is extra message with the trigger?",
+                out_type=bool,
+                reaction_interface=True,
             ),
         ]
 
@@ -125,15 +141,16 @@ class AutoResponses(commands.Cog):
             confirm_prompt=True,
         )
 
-        trigger, response = await wizard.run(ctx.channel)
+        trigger, response, extra_arguements = await wizard.run(ctx.channel)
 
         record, _ = await AutoResponseModel.get_or_create(
             guild=guild, trigger=trigger.lower()
         )
         record.enabled = True
         record.response = response
+        record.extra_arguements = extra_arguements
 
-        await record.save(update_fields=["enabled", "response"])
+        await record.save(update_fields=["enabled", "response", "extra_arguements"])
 
     @autoresponse.command(name="delete", aliases=["delresponse", "del"])
     @commands.has_permissions(administrator=True)

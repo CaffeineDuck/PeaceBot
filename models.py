@@ -49,6 +49,10 @@ class AutoResponseModel(Model):
     enabled = fields.BooleanField(
         default=False, description="Boolean to show of the trigger is enabled"
     )
+    extra_arguements = fields.BooleanField(
+        default=False,
+        description="If the autoresponse should be run even when extra arguements are passed",
+    )
     guild = fields.ForeignKeyField("main.GuildModel", related_name="Autoresponses")
 
     class Meta:
