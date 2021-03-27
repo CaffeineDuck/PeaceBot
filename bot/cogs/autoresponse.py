@@ -1,6 +1,9 @@
-from typing import Union
+import re
+from typing import Union, List
 
 import discord
+from cachetools import TTLCache
+from discord import Embed, Color
 from discord.ext import commands
 from discord.ext.commands import BucketType
 
@@ -9,9 +12,12 @@ from utils.wizard_embed import Prompt, Wizard
 from config.personal_guild import personal_guild
 
 
-class AutoResponseDoesNotExist(commands.CommandError):
+class AutoResponseError(commands.CommandError):
+    def __init__(self, message: str):
+        self.message = message
+
     def __str__(self):
-        return "This autoresponse doesnot in this guild!"
+        return self.message
 
 
 class AutoResponses(commands.Cog):
@@ -19,20 +25,24 @@ class AutoResponses(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.autoresponse_cache = TTLCache(maxsize=1000, ttl=600)
 
-    async def commands_checker(self, command: str, guild_id: int) -> bool:
-        """Checks if the autoresponse is enabled and exists in that server!
+    async def cog_before_invoke(self, ctx: commands.Context) -> None:
+        autoresponses = self.autoresponse_cache.get(ctx.guild.id)
 
-        Args:
-            command (str): Command for the autoresponse
-            guild_id (int): Id of the guild
+        if not autoresponses:
+            autoresponses = await AutoResponseModel.filter(guild__id=ctx.guild.id)
+            self.autoresponse_cache[ctx.guild.id] = autoresponses
 
-        Returns:
-            bool: Autoresponse exists and is enabled in that guild
-        """
-        return await AutoResponseModel.exists(
-            guild__id=guild_id, trigger=command, enabled=True
-        )
+        ctx.autoresponses = autoresponses
+
+    async def update_autoresponse_cache(
+        self, ctx: commands.Context
+    ) -> List[AutoResponseModel]:
+        autoresponses = await AutoResponseModel.filter(guild__id=ctx.guild.id)
+        self.autoresponse_cache[ctx.guild.id] = autoresponses
+        ctx.autoresponses = autoresponses
+        return autoresponses
 
     async def autoresponse_message_formatter(
         self, message: discord.Message, response: str
@@ -49,42 +59,79 @@ class AutoResponses(commands.Cog):
         Raises:
             KeyError, AttributeError
         """
-        message_content = " ".join(message.content.split(" ")[1:])
+        try:
+            # Checks if the mentions is needed in response
+            mention = message.mentions[0] if "{mention}" in response else None
+        except IndexError:
+            raise AutoResponseError("You need to mention someone for this to work!")
+
+        message_content = (
+            " ".join(message.content.split(" ")[1:])
+            if "{message}" in response
+            else None
+        )
+
+        if message_content == "":
+            raise AutoResponseError(
+                "You need to write some extra message for this to work!"
+            )
+
         updated_message = response.format(
             author=message.author,
             message=message_content,
             raw_message=message,
             server=message.guild,
+            mention=mention,
         )
         return updated_message
 
-    # On message listner to give the autoresponse if it matches the trigger!
-    @commands.Cog.listener()
-    async def on_message(self, msg: discord.Message):
-        if msg.author.bot:
-            return
+    async def autoresponse_error_handler(
+        self, message: discord.Message, error: Exception
+    ):
+        title = " ".join(re.compile(r"[A-Z][a-z]*").findall(error.__class__.__name__))
+        description = str(error)
 
-        # Loops through all the custom autoresponses (GUILD SPECIFIC)
-        autoresponses = await AutoResponseModel.filter(
-            guild__id=msg.guild.id, enabled=True
+        await message.channel.send(
+            embed=Embed(title=title, description=str(error), color=Color.red())
         )
 
-        #Gets the first autoresponse object if the sent message is an autoresponse trigger
-        filtered_autoresponse = ([autoresponse for autoresponse in autoresponses if autoresponse.trigger == msg.content.split(" ")[0].lower()])[0]
-
-        if not filtered_autoresponse:
-            return
-        
-        if filtered_autoresponse.extra_arguements:
-            output = await self.autoresponse_message_formatter(
-                msg, filtered_autoresponse.response
-            )
-        elif filtered_autoresponse.trigger == msg.content:
-            output = filtered_autoresponse.response
-        else:
+    @commands.Cog.listener()
+    async def on_message(self, msg: discord.Message):
+        if msg.author.bot or msg.embeds or not msg.content:
             return
 
-        await msg.channel.send(output)
+        autoresponses = self.autoresponse_cache.get(msg.guild.id)
+
+        if not autoresponses:
+            ctx = await self.bot.get_context(msg)
+            autoresponses = await self.update_autoresponse_cache(ctx)
+
+        try:
+            # Gets the first autoresponse object if the sent message is an autoresponse trigge
+            filtered_autoresponse = (
+                [
+                    autoresponse
+                    for autoresponse in autoresponses
+                    if autoresponse.trigger == msg.content.split(" ")[0].lower()
+                    and autoresponse.enabled
+                ]
+            )[0]
+        except IndexError or TypeError:
+            return
+
+        try:
+            if filtered_autoresponse.extra_arguements:
+                output = await self.autoresponse_message_formatter(
+                    msg, filtered_autoresponse.response
+                )
+            elif filtered_autoresponse.trigger == msg.content:
+                output = filtered_autoresponse.response
+            else:
+                return
+            await msg.channel.send(output)
+
+        except Exception as error:
+            await self.autoresponse_error_handler(msg, error)
 
     @commands.group(aliases=["autoresponses"])
     @commands.guild_only()
@@ -96,23 +143,27 @@ class AutoResponses(commands.Cog):
 
     @autoresponse.command(name="toggle", aliases=["change"])
     async def autoresponse_toggle(
-        self, ctx: commands.Context, trigger: str, is_enabled: bool
+        self, ctx: commands.Context, trigger: str, toggle: bool
     ):
         """Enable/ Disable an autoresponse!"""
-        # Checks if the trigger and response exists in that guild and works accordingly!
-        record = await AutoResponseModel.get_or_none(
-            guild__id=ctx.guild.id, trigger=trigger
-        )
-        if record:
-            record.enabled = is_enabled
-            await record.save(update_fields=["enabled"])
-            if is_enabled:
-                await ctx.send(f"The autoresponse `{trigger}` has been enabled!")
-            elif not is_enabled:
-                await ctx.send(f"The autoresponse `{trigger}` has been disabled!")
-                return
-        else:
-            raise AutoResponseDoesNotExist()
+        record = [
+            autoresponse
+            for autoresponse in ctx.autoresponses
+            if autoresponse.trigger == trigger
+        ]
+
+        if not record:
+            raise AutoResponseError("This autoresponse doesnot exist in this guild!")
+
+        # Getting the first value from the record as record is a list
+        record = record[0]
+        record.enabled = toggle
+        await record.save(update_fields=["enabled"])
+
+        toggle_str = "enabled" if toggle else "disabled"
+
+        await ctx.send(f"The autoresponse {trigger} has been {toggle_str}")
+        await self.update_autoresponse_cache(ctx)
 
     @autoresponse.command(name="add", aliases=["addresponses", "addautoresponses"])
     async def autoresponse_add(self, ctx: commands.Context):
@@ -151,15 +202,22 @@ class AutoResponses(commands.Cog):
         record.extra_arguements = extra_arguements
 
         await record.save(update_fields=["enabled", "response", "extra_arguements"])
+        await self.update_autoresponse_cache(ctx)
 
     @autoresponse.command(name="delete", aliases=["delresponse", "del"])
     @commands.has_permissions(administrator=True)
-    async def autoresponse_delete(self, ctx: commands.Context, command: str):
+    async def autoresponse_delete(self, ctx: commands.Context, trigger: str):
         """Deletes the autoresponse"""
         guild = await GuildModel.from_context(ctx)
 
-        if not await AutoResponseModel.exists(guild=guild, trigger=command):
-            raise AutoResponseDoesNotExist()
+        autoresponse = [
+            autoresponse
+            for autoresponse in ctx.autoresponses
+            if autoresponse.trigger == trigger
+        ]
+
+        if not autoresponse:
+            raise AutoResponseError("This autoresponse doesnot in this guild!")
 
         prompts = [
             Prompt(
@@ -179,50 +237,47 @@ class AutoResponses(commands.Cog):
         )
         response = await wizard.run(ctx.channel)
 
-        if not response:
-            return
-
-        await AutoResponseModel.get(guild=guild, trigger=command).delete()
+        await AutoResponseModel.get(guild=guild, trigger=trigger).delete()
+        await self.update_autoresponse_cache(ctx)
 
     @autoresponse.command(name="list", aliases=["show", "showall", "all"])
     async def autoresponse_list(self, ctx):
         """Shows the list of all the autoresponses"""
 
-        # Gets the list of all the enabled autoresponses in that guild!
-        datas = await AutoResponseModel.filter(guild__id=ctx.guild.id)
-        enabled_autoresponses = []
-        disabled_autoresponses = []
-
-        # Loops throught the list(datas) to get the enabled triggers for that server
-        for data in datas:
-            if data.enabled:
-                enabled_autoresponses.append(f"`{data.trigger}`")
-            else:
-                disabled_autoresponses.append(f"`{data.trigger}`")
+        enabled_autoresponses = [
+            f"`{autoresponse.trigger}`"
+            for autoresponse in ctx.autoresponses
+            if autoresponse.enabled
+        ]
+        disabled_autoresponses = [
+            f"`{autoresponse.trigger}`"
+            for autoresponse in ctx.autoresponses
+            if not autoresponse.enabled
+        ]
 
         # Creates the list into a string
         enabled_autoresponses = ", ".join(enabled_autoresponses)
         disabled_autoresponses = ", ".join(disabled_autoresponses)
 
         # Sends the embed with all the enabled autoresponses for that server!
-        e = discord.Embed(title="Autorespones", colour=discord.Color.gold())
+        embed = discord.Embed(title="Autorespones", colour=discord.Color.gold())
 
-        e.add_field(
+        embed.add_field(
             name="Enabled Autoresponses",
             value=enabled_autoresponses
             if enabled_autoresponses
             else "There are no enabled autoresponses in this server!",
             inline=False,
         )
-
         if disabled_autoresponses:
-            e.add_field(
+            embed.add_field(
                 name="Disabled Autoresponses",
                 value=disabled_autoresponses,
                 inline=False,
             )
-        e.set_footer(text=f"Requested by {ctx.author}")
-        await ctx.send(embed=e)
+        embed.set_footer(text=f"Requested by {ctx.author}")
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
