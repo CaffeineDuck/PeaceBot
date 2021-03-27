@@ -238,7 +238,7 @@ class AutoResponses(commands.Cog):
         ]
 
         if not autoresponse:
-            raise AutoResponseError("This autoresponse doesnot in this guild!")
+            raise AutoResponseError("This autoresponse doesnot exist in this guild!")
 
         prompts = [
             Prompt(
