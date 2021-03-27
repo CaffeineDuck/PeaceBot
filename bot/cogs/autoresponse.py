@@ -224,6 +224,7 @@ class AutoResponses(commands.Cog):
         await ctx.send("All autoresponses for this guild have been deleted!")
 
     @autoresponse.command(name="delete", aliases=["delresponse", "del"])
+    @commands.cooldown(1, 10, BucketType.user)
     async def autoresponse_delete(self, ctx: commands.Context, trigger: str):
         """Deletes the autoresponse"""
         guild = await GuildModel.from_context(ctx)
