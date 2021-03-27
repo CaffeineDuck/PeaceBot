@@ -64,6 +64,13 @@ class Core(commands.Cog):
         )
         await ctx.send(embed=embed)
 
+    @commands.command()
+    async def invite(self, ctx: commands.Context):
+        """Get the invite link of this bot from this command!"""
+        await ctx.send(
+            f"https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=8&scope=bot"
+        )
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Core(bot))
