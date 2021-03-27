@@ -36,6 +36,11 @@ class AutoResponses(commands.Cog):
 
         ctx.autoresponses = autoresponses
 
+    async def cog_after_invoke(self, ctx: commands.Context) -> None:
+        if ctx.command == self.autoresponse_list:
+            return
+        await self.update_autoresponse_cache(ctx)
+
     async def update_autoresponse_cache(
         self, ctx: commands.Context
     ) -> List[AutoResponseModel]:
@@ -61,7 +66,7 @@ class AutoResponses(commands.Cog):
         """
         try:
             # Checks if the mentions is needed in response
-            mention = message.mentions[0] if "{mention}" in response else None
+            mentioned = message.mentions[0] if "{mentioned}" in response else None
         except IndexError:
             raise AutoResponseError("You need to mention someone for this to work!")
 
@@ -76,13 +81,18 @@ class AutoResponses(commands.Cog):
                 "You need to write some extra message for this to work!"
             )
 
-        updated_message = response.format(
-            author=message.author,
-            message=message_content,
-            raw_message=message,
-            server=message.guild,
-            mention=mention,
-        )
+        try:
+            updated_message = response.format(
+                author=message.author,
+                message=message_content,
+                raw_message=message,
+                server=message.guild,
+                mentioned=mentioned,
+            )
+        except KeyError as error:
+            raise AutoResponseError(
+                f"""`{str(error).replace("'", "")}` is not a valid arguement!"""
+            )
         return updated_message
 
     async def autoresponse_error_handler(
@@ -163,7 +173,6 @@ class AutoResponses(commands.Cog):
         toggle_str = "enabled" if toggle else "disabled"
 
         await ctx.send(f"The autoresponse {trigger} has been {toggle_str}")
-        await self.update_autoresponse_cache(ctx)
 
     @autoresponse.command(name="add", aliases=["addresponses", "addautoresponses"])
     async def autoresponse_add(self, ctx: commands.Context):
@@ -202,10 +211,15 @@ class AutoResponses(commands.Cog):
         record.extra_arguements = extra_arguements
 
         await record.save(update_fields=["enabled", "response", "extra_arguements"])
-        await self.update_autoresponse_cache(ctx)
+
+    @autoresponse.command(name="delete_all", aliases=["dall", "remall"])
+    @commands.has_permissions(administrator=True)
+    async def autoresponse_delete_all(self, ctx: commands.Context):
+        guild = await GuildModel.from_context(ctx)
+        await AutoResponseModel.filter(guild=guild).delete()
+        await ctx.send("All autoresponses for this guild have been deleted!")
 
     @autoresponse.command(name="delete", aliases=["delresponse", "del"])
-    @commands.has_permissions(administrator=True)
     async def autoresponse_delete(self, ctx: commands.Context, trigger: str):
         """Deletes the autoresponse"""
         guild = await GuildModel.from_context(ctx)
@@ -238,7 +252,6 @@ class AutoResponses(commands.Cog):
         response = await wizard.run(ctx.channel)
 
         await AutoResponseModel.get(guild=guild, trigger=trigger).delete()
-        await self.update_autoresponse_cache(ctx)
 
     @autoresponse.command(name="list", aliases=["show", "showall", "all"])
     async def autoresponse_list(self, ctx):
