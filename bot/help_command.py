@@ -74,7 +74,9 @@ class HelpCommand(commands.HelpCommand):
         )
         cooldown = command._buckets._cooldown
         embed.add_field(
-            name="Cooldown", value=(f"`{cooldown.per} seconds`") if cooldown else 'None', inline=False
+            name="Cooldown",
+            value=(f"`{cooldown.per} seconds`") if cooldown else "None",
+            inline=False,
         )
         await self.dispatch_help(embed)
 
