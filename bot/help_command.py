@@ -72,6 +72,10 @@ class HelpCommand(commands.HelpCommand):
         embed.add_field(
             name="Usage", value=f"`{self.get_command_signature(command)}`", inline=False
         )
+        cooldown = command._buckets._cooldown
+        embed.add_field(
+            name="Cooldown", value=(f"`{cooldown.per} seconds`") if cooldown else 'None', inline=False
+        )
         await self.dispatch_help(embed)
 
     async def send_group_help(self, group: commands.Group) -> None:
@@ -110,11 +114,9 @@ class HelpCommand(commands.HelpCommand):
         )
         command = commands.Command
 
-        filtered_commands = await self.filter_commands(cog.walk_commands())
-
         commands_in_cog = [
             f"`{command.name}`"
-            for command in filtered_commands
+            for command in cog.walk_commands()
             if command.parent is None
         ]
 
