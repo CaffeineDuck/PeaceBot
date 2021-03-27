@@ -151,6 +151,7 @@ class AutoResponses(commands.Cog):
         if not ctx.invoked_subcommand:
             await ctx.send_help(ctx.command)
 
+    @commands.cooldown(1, 10, BucketType.user)
     @autoresponse.command(name="toggle", aliases=["change"])
     async def autoresponse_toggle(
         self, ctx: commands.Context, trigger: str, toggle: bool
@@ -174,6 +175,7 @@ class AutoResponses(commands.Cog):
 
         await ctx.send(f"The autoresponse {trigger} has been {toggle_str}")
 
+    @commands.cooldown(1, 60, BucketType.user)
     @autoresponse.command(name="add", aliases=["addresponses", "addautoresponses"])
     async def autoresponse_add(self, ctx: commands.Context):
         """Add new autoresponse"""
@@ -213,8 +215,10 @@ class AutoResponses(commands.Cog):
         await record.save(update_fields=["enabled", "response", "extra_arguements"])
 
     @autoresponse.command(name="delete_all", aliases=["dall", "remall"])
+    @commands.cooldown(1, 500, BucketType.user)
     @commands.has_permissions(administrator=True)
     async def autoresponse_delete_all(self, ctx: commands.Context):
+        """Delete all the autoresponses in the guild"""
         guild = await GuildModel.from_context(ctx)
         await AutoResponseModel.filter(guild=guild).delete()
         await ctx.send("All autoresponses for this guild have been deleted!")
