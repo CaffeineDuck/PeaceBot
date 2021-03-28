@@ -17,6 +17,7 @@ autopep8 = "*"
 cachetools = "*"
 pynacl = "*"
 youtube-dl = "*"
+psutil = "*"
 
 [dev-packages]
 

@@ -1,3 +1,8 @@
+import platform
+import sys
+
+import psutil
+from discord import __version__ as discord_version
 from discord import Color, Embed, NotFound
 from discord.ext import commands
 
@@ -29,9 +34,20 @@ class Core(commands.Cog):
         guilds = len(self.bot.guilds)
 
         embed = Embed(color=Color.dark_green())
-        embed.add_field(name="Guilds", value=guilds)
-        embed.add_field(name="Users", value=users)
-        embed.set_thumbnail(url=ctx.guild.me.avatar_url)
+        fields = (
+            ("Guilds", guilds),
+            ("Users", users),
+            (
+                "Memory",
+                "{:.4} MB".format(psutil.Process().memory_info().rss / 1024 ** 2),
+            ),
+            ("Python version", ".".join([str(v) for v in sys.version_info[:3]])),
+            ("DPY Version", discord_version),
+        )
+        for name, value in fields:
+            embed.add_field(name=name, value=str(value), inline=False)
+
+        embed.set_thumbnail(url=str(ctx.guild.me.avatar_url))
 
         await ctx.send(embed=embed)
 
