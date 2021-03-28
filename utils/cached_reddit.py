@@ -58,7 +58,6 @@ class RedditPostCacher:
         async with aiofiles.open(self.file_path, mode="wb+") as f:
             await f.write(pickle.dumps(data_to_dump))
 
-
     async def get_random_post(self, subreddit: str) -> Dict[str, str]:
         Submission
         """Fetches a post from the internal cache
@@ -105,7 +104,9 @@ class RedditPostCacher:
 
         # Sends the embed!
         embed = discord.Embed(
-            description=f"**[{submission.get('title')}](https://new.reddit.com{submission.get('permalink')})**",
+            description="**[{}](https://new.reddit.com{})**".format(
+                submission.get("title"), submission.get("permalink")
+            ),
             colour=discord.Color.dark_purple(),
         )
         discord.Member
