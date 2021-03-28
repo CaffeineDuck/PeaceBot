@@ -37,8 +37,8 @@ class PeaceBot(commands.Bot):
         self.prefix = prefix
         self.prefixes_cache = LRUCache(100)
 
-        #Makes the cog-help case insensivite
-        #self._botBase__cogs  = commands.core._CaseInsensitiveDict()
+        # Makes the cog-help case insensivite
+        # self._botBase__cogs  = commands.core._CaseInsensitiveDict()
 
         if load_extensions:
             self.load_extensions(

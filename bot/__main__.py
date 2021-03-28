@@ -17,5 +17,5 @@ if __name__ == "__main__":
         prefix=bot_config.prefix,
         developement_environment=bot_config.developement_environment,
     )
-    
+
     bot.run(bot_config.token)

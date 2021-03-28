@@ -89,8 +89,8 @@ class Misc(commands.Cog):
         index = 1
         akinator = Akinator()
         question = await akinator.start_game(child_mode=True)
-        
-        #Convert the list of tupes of values into a list of all the valid responses
+
+        # Convert the list of tupes of values into a list of all the valid responses
         akinator_valid_responses = [
             response for values in AKINATOR_RESPONSES.values() for response in values
         ]
