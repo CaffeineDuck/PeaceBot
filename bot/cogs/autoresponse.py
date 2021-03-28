@@ -28,7 +28,7 @@ class AutoResponses(commands.Cog):
         self.bot = bot
         self.autoresponse_cache = TTLCache(maxsize=1000, ttl=600)
 
-    #Runs before every command invokation
+    # Runs before every command invokation
     async def cog_before_invoke(self, ctx: commands.Context) -> None:
         autoresponses = self.autoresponse_cache.get(ctx.guild.id)
 
@@ -38,7 +38,7 @@ class AutoResponses(commands.Cog):
 
         ctx.autoresponses = autoresponses
 
-    #Runs after every command invokation
+    # Runs after every command invokation
     async def cog_after_invoke(self, ctx: commands.Context) -> None:
         if ctx.command == self.autoresponse_list:
             return

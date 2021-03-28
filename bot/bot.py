@@ -24,7 +24,7 @@ class PeaceBot(commands.Bot):
         prefix: str,
         load_extensions: bool = True,
         loadjsk: bool = True,
-        developement_environment: bool = True
+        developement_environment: bool = True,
     ):
         super().__init__(
             command_prefix=self.determine_prefix,
@@ -36,6 +36,9 @@ class PeaceBot(commands.Bot):
         self.connect_db.start()
         self.prefix = prefix
         self.prefixes_cache = LRUCache(100)
+
+        #Makes the cog-help case insensivite
+        #self._botBase__cogs  = commands.core._CaseInsensitiveDict()
 
         if load_extensions:
             self.load_extensions(

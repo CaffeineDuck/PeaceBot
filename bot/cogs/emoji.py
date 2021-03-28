@@ -9,6 +9,7 @@ from discord.ext.commands import Greedy
 
 from __main__ import PeaceBot
 
+
 class Emoji(commands.Cog):
     def __init__(self, bot: PeaceBot):
         self.bot = bot

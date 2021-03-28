@@ -17,26 +17,23 @@ HTTP_ERROR_VALID_RANGES = (
     (599, 600),
 )
 
-AKINATOR_VALID_RESPONSES = (
-    "yes",
-    "y",
-    "0",
-    "no",
-    "n",
-    "1",
-    "i",
-    "idk",
-    "i dont know",
-    "i don't know",
-    "2",
-    "probably",
-    "p",
-    "3",
-    "probably not",
-    "pn",
-    "4",
-    "stop",
-)
+AKINATOR_RESPONSES = {
+    "yes": ("yes", "y", "0"),
+    "no": ("no", "n", "1"),
+    "idk": ("idk", "i", "2"),
+    "back": ("probably", "p", "3"),
+    "probably": ("probably not", "pn", "4"),
+    "stop": ("stop", "s", "5"),
+    "back": ("back", "b", "6"),
+}
+
+
+class AkiError(commands.CommandError):
+    def __init__(self, message: str):
+        self.message = message
+
+    def __str__(self):
+        return self.message
 
 
 class Misc(commands.Cog):
@@ -75,28 +72,34 @@ class Misc(commands.Cog):
     @commands.max_concurrency(1, per=commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.channel)
     async def aki(self, ctx: commands.Context):
-        """Play with aki"""
-
-        index = 1
         """Play akinator!
         **Always respond within 30 seconds**
         Valid question responses:
-        - **Yes**: y, yes, 0
+        - **Yes**: yes, y, 0
         - **No**: no, n, 1
-        - **I don't know**: i, idk, i dont know, i don't know, 2
+        - **I don't know**: i, idk, 2
         - **Probably**: probably, p, 3
         - **Probably Not**: probably not, pn, 4
-        - **Stop**: stop
+        - **Stop**: stop, s, 5
+        - **Back**: back, b, 6
         """
+
         await ctx.trigger_typing()
+
+        index = 1
         akinator = Akinator()
         question = await akinator.start_game(child_mode=True)
+        
+        #Convert the list of tupes of values into a list of all the valid responses
+        akinator_valid_responses = [
+            response for values in AKINATOR_RESPONSES.values() for response in values
+        ]
 
         def check(message: Message):
             return (
                 message.channel == ctx.channel
                 and message.author == ctx.author
-                and message.content.lower() in AKINATOR_VALID_RESPONSES
+                and message.content.lower() in akinator_valid_responses
             )
 
         while akinator.progression <= 80:
@@ -111,22 +114,25 @@ class Misc(commands.Cog):
                 name=f"**{question}**",
                 value="[yes (**y**) / no (**n**) / idk (**i**) / probably (**p**) / probably not (**pn**)]\
                     \n[back (**b**)]\
-                    \n[stop (**stop**)]",
+                    \n[stop (**s**)]",
             )
             await ctx.send(embed=embed)
+
             try:
                 answer_message = await self.bot.wait_for(
                     "message", check=check, timeout=30
                 )
             except asyncio.TimeoutError:
-                await ctx.send(f"{ctx.author.mention} You didn't respond in time!")
+                raise AkiError("You didn't respond in time!")
+            if answer_message.content.lower() in AKINATOR_RESPONSES.get("stop"):
+                await ctx.send("Aki stopped!")
                 return
-            if answer_message.content.lower() == "stop":
-                await ctx.send("Akinator stopped!")
-                return
-            question = await akinator.answer(answer_message.content)
-
-            index += 1
+            if answer_message.content.lower() in AKINATOR_RESPONSES.get("back"):
+                question = await akinator.back()
+                index -= 1
+            else:
+                question = await akinator.answer(answer_message.content)
+                index += 1
 
         await akinator.win()
 
@@ -149,17 +155,16 @@ class Misc(commands.Cog):
             )
             response = confirmation_message.content.lower()
 
-            if response in ("yes", "y"):
+            if response in AKINATOR_RESPONSES.get("yes"):
                 await ctx.send("I Guessed correct, Once Again")
-            elif response in ("no", "n"):
+            elif response in AKINATOR_RESPONSES.get("no"):
                 await ctx.send("I have been defeated. You Win.")
             else:
                 await ctx.send(
                     "I don't know what that means but I'll take it as a win "
                 )
-
         except TimeoutError:
-            await ctx.send("I don't know what that means but I'll take it as a win ")
+            raise AkiError("You didn't respond in time!")
 
     @commands.command()
     async def emojify(self, ctx: Context, *, word: str):
