@@ -33,16 +33,17 @@ class RedditPostCacher:
         data_to_dump = dict()
         for subreddit in subreddits:
             await subreddit.load()
-            post_urls = [post.url async for post in subreddit.hot(limit=50)]
+            posts = [{'url': post.url, 'title': post.title} async for post in subreddit.hot(limit=50)]
             allowed_extensions = (".gif", ".png", ".jpg", ".jpeg")
-            post_urls = list(
+            posts = list(
                 filter(
-                    lambda i: any((i.endswith(e) for e in allowed_extensions)),
-                    post_urls,
+                    lambda i: any((i.get('url').endswith(e) for e in allowed_extensions)),
+                    posts,
                 )
             )
             # print(post_urls[1:3])
-            data_to_dump[subreddit.display_name] = post_urls
+            data_to_dump[subreddit.display_name] = posts
+
 
         async with aiofiles.open(self.file_path, mode="wb+") as f:
             await f.write(pickle.dumps(data_to_dump))

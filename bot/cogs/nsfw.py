@@ -44,11 +44,11 @@ class NSFW(commands.Cog):
 
         # Sends the embed!
         embed = discord.Embed(
-            title=title,
+            title=submission.get('title') or title,
             timestamp=ctx.message.created_at,
             colour=discord.Color.dark_purple(),
         )
-        embed.set_image(url=submission)
+        embed.set_image(url=submission.get('url'))
         embed.set_footer(text=f"Requested by {ctx.author}")
         await ctx.send(embed=embed)
 
