@@ -58,7 +58,6 @@ class RedditPostCacher:
         async with aiofiles.open(self.file_path, mode="wb+") as f:
             await f.write(pickle.dumps(data_to_dump))
 
-    Submission
 
     async def get_random_post(self, subreddit: str) -> Dict[str, str]:
         Submission
