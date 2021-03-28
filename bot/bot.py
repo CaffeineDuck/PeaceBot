@@ -7,6 +7,7 @@ from typing import List
 import watchgod
 from discord import Color, Embed, Intents, Member, Message
 from discord.ext import commands, tasks
+from cachetools import LRUCache
 from tortoise import Tortoise
 
 from models import GuildModel
@@ -23,6 +24,7 @@ class PeaceBot(commands.Bot):
         prefix: str,
         load_extensions: bool = True,
         loadjsk: bool = True,
+        developement_environment: bool = True
     ):
         super().__init__(
             command_prefix=self.determine_prefix,
@@ -30,8 +32,10 @@ class PeaceBot(commands.Bot):
             help_command=HelpCommand(),
         )
         self.tortoise_config = tortoise_config
+        self.developement_environment = developement_environment
         self.connect_db.start()
         self.prefix = prefix
+        self.prefixes_cache = LRUCache(100)
 
         if load_extensions:
             self.load_extensions(
@@ -53,13 +57,21 @@ class PeaceBot(commands.Bot):
         if loadjsk:
             self.load_extension("jishaku")
 
+    async def cache_guild_prefix(self, message: Message) -> None:
+        guild_model = await GuildModel.from_guild_object(message.guild)
+        self.prefixes_cache[message.guild.id] = guild_model.prefix
+        return guild_model.prefix
+
     async def determine_prefix(self, bot: commands.Bot, message: Message) -> str:
         guild = message.guild
-        if guild:
-            guild_model = await GuildModel.from_guild_object(message.guild)
-            return commands.when_mentioned_or(guild_model.prefix)(bot, message)
-        else:
+        if not guild:
             return commands.when_mentioned_or(self.prefix)(bot, message)
+
+        prefix = self.prefixes_cache.get(guild.id)
+        if not prefix:
+            prefix = await self.cache_guild_prefix(message)
+
+        return commands.when_mentioned_or(prefix)(bot, message)
 
     @tasks.loop(seconds=0, count=1)
     async def connect_db(self):
@@ -105,5 +117,6 @@ class PeaceBot(commands.Bot):
 
     async def on_ready(self):
         print(f"Logged in as {self.user.name}#{self.user.discriminator}")
-        self.cog_watcher_task.start()
+        if self.developement_environment:
+            self.cog_watcher_task.start()
         print("Ready")

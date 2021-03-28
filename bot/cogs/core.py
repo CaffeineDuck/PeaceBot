@@ -1,6 +1,7 @@
 from discord import Color, Embed, NotFound
 from discord.ext import commands
 
+from __main__ import PeaceBot
 from models import GuildModel
 
 
@@ -10,7 +11,7 @@ class MessageNotRefrenced(commands.CommandError):
 
 
 class Core(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: PeaceBot):
         self.bot = bot
 
     @commands.command(aliases=["latency"])
@@ -72,5 +73,5 @@ class Core(commands.Cog):
         )
 
 
-def setup(bot: commands.Bot):
+def setup(bot: PeaceBot):
     bot.add_cog(Core(bot))

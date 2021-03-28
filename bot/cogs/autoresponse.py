@@ -7,6 +7,7 @@ from discord import Embed, Color
 from discord.ext import commands
 from discord.ext.commands import BucketType
 
+from __main__ import PeaceBot
 from models import AutoResponseModel, GuildModel
 from utils.wizard_embed import Prompt, Wizard
 from config.personal_guild import personal_guild
@@ -23,7 +24,7 @@ class AutoResponseError(commands.CommandError):
 class AutoResponses(commands.Cog):
     """Manage the autoresponses in this server"""
 
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: PeaceBot):
         self.bot = bot
         self.autoresponse_cache = TTLCache(maxsize=1000, ttl=600)
 
@@ -300,5 +301,5 @@ class AutoResponses(commands.Cog):
         await ctx.send(embed=embed)
 
 
-def setup(bot):
+def setup(bot: PeaceBot):
     bot.add_cog(AutoResponses(bot))

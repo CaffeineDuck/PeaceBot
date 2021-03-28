@@ -4,6 +4,7 @@ import os
 from discord.ext import commands
 from discord.ext.commands import BucketType
 
+from __main__ import PeaceBot
 from models import GuildModel
 
 
@@ -13,7 +14,7 @@ class Config(commands.Cog):
     commands in this extension.
     """
 
-    def __init__(self, bot):
+    def __init__(self, bot: PeaceBot):
         self.bot = bot
 
     @commands.command()
@@ -21,7 +22,7 @@ class Config(commands.Cog):
     @commands.bot_has_permissions(send_messages=True, read_messages=True)
     @commands.bot_has_guild_permissions(send_messages=True, read_messages=True)
     @commands.guild_only()
-    async def changeprefix(self, ctx, prefix: str):
+    async def changeprefix(self, ctx: commands.Context, prefix: str):
         if ctx.author is not ctx.guild.owner:
             embed = discord.Embed(
                 color=discord.Color.blue(),
@@ -40,6 +41,7 @@ class Config(commands.Cog):
             if guild is not None:
                 guild.prefix = prefix
                 await guild.save(update_fields=["prefix"])
+                self.bot.prefixes_cache[ctx.guild.id] = prefix
 
             embed = discord.Embed(
                 color=discord.Color.blue(),
@@ -48,5 +50,5 @@ class Config(commands.Cog):
             await ctx.send(embed=embed)
 
 
-def setup(bot: commands.Bot):
+def setup(bot: PeaceBot):
     bot.add_cog(Config(bot))

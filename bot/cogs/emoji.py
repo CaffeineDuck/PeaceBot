@@ -7,9 +7,10 @@ from discord.ext import commands
 from discord.ext.commands import BucketType
 from discord.ext.commands import Greedy
 
+from __main__ import PeaceBot
 
 class Emoji(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: PeaceBot):
         self.bot = bot
         self.emoji_extraction_pattern = re.compile(r"<(a?):([a-zA-Z0-9\_]+):([0-9]+)>")
 
@@ -97,5 +98,5 @@ class Emoji(commands.Cog):
         await ctx.send(embed=summary)
 
 
-def setup(bot):
+def setup(bot: PeaceBot):
     bot.add_cog(Emoji(bot))
