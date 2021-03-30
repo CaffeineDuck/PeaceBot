@@ -7,9 +7,9 @@ from discord import Embed, Color
 from discord.ext import commands
 from discord.ext.commands import BucketType
 
-from __main__ import PeaceBot
+from ..bot import PeaceBot
 from models import AutoResponseModel, GuildModel
-from utils.wizard_embed import Prompt, Wizard
+from bot.utils.wizard_embed import Prompt, Wizard
 from config.personal_guild import personal_guild
 
 
@@ -90,11 +90,11 @@ class AutoResponses(commands.Cog):
                 message=message_content,
                 raw_message=message,
                 server=message.guild,
-                mentioned=mentioned,
+                mentioned=mentioned.mention,
             )
         except KeyError as error:
             raise AutoResponseError(
-                f"""`{str(error).replace("'", "")}` is not a valid arguement!"""
+                f"""{str(error).replace("'", "`")} is not a valid arguement!"""
             )
         return updated_message
 

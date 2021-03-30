@@ -30,6 +30,14 @@ class PersonalGuild(commands.Cog):
         user = user or ctx.author
         await ctx.send(f"Get Naked {user.mention}")
 
+    @commands.command(aliases=["s", "say"])
+    @commands.check(is_personal_guild)
+    async def send(self, ctx, member: discord.Member, *, message="No reason provided"):
+        try:
+            await member.send(f"{ctx.author.mention} said: {message}")
+        except Exception:
+            await ctx.send(f"{member.mention} has his/her DMs closed. :(")
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(PersonalGuild(bot))

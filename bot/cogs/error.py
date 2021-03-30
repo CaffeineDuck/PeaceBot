@@ -23,6 +23,15 @@ class ErrorHandler(commands.Cog):
             await ctx.send(
                 f"You are missing the following permissions:\n**{','.join(error.missing_perms)}**"
             )
+        elif isinstance(error, commands.NSFWChannelRequired):
+            image = "https://i.imgur.com/oe4iK5i.gif"
+            embed = discord.Embed(
+                title="NSFW not allowed here",
+                description="Use NSFW commands in a NSFW marked channel.",
+                color=discord.Color.dark_blue(),
+            )
+            embed.set_image(url=image)
+            await ctx.send(embed=embed)
         else:
             title = " ".join(
                 re.compile(r"[A-Z][a-z]*").findall(error.__class__.__name__)

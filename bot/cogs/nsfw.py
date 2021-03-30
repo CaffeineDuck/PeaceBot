@@ -7,7 +7,7 @@ import asyncpraw
 import discord
 from discord.ext import commands, tasks
 
-from utils.cached_reddit import RedditPostCacher
+from bot.utils.cached_reddit import RedditPostCacher
 
 
 class NSFW(commands.Cog):
@@ -26,19 +26,6 @@ class NSFW(commands.Cog):
         )
         self.cache = RedditPostCacher(self.subreddits, "cache/NSFW.pickle")
         self.cache.cache_posts.start()
-
-    # Errorhandler, if the channel isn't NSFW!
-    @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
-        if isinstance(error, commands.NSFWChannelRequired):
-            image = "https://i.imgur.com/oe4iK5i.gif"
-            embed = discord.Embed(
-                title="NSFW not allowed here",
-                description="Use NSFW commands in a NSFW marked channel.",
-                color=discord.Color.dark_blue(),
-            )
-            embed.set_image(url=image)
-            await ctx.send(embed=embed)
 
     # NSFW COMMANDS
     @commands.command()

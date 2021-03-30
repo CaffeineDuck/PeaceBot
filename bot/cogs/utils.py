@@ -7,7 +7,7 @@ from discord import Embed, Message, TextChannel
 from discord.ext import commands, flags
 
 from __main__ import PeaceBot
-from utils.embed_flag_input import (
+from bot.utils.embed_flag_input import (
     allowed_mentions_input,
     dict_to_allowed_mentions,
     dict_to_embed,
@@ -18,10 +18,12 @@ from utils.embed_flag_input import (
 
 flags._converters.CONVERTERS["Message"] = commands.MessageConverter().convert
 
+
 async def maybe_await(coro):
     if not coro:
         return
     return await coro
+
 
 class Utils(commands.Cog):
     def __init__(self, bot: PeaceBot):
@@ -40,12 +42,11 @@ class Utils(commands.Cog):
 
         await ctx.send(embed=embed)
 
-
-
     """
     Source of the following code:
     https://github.com/falsedev/tech-struck
     """
+
     @embed_input(all=True)
     @allowed_mentions_input()
     @webhook_input()
@@ -138,6 +139,7 @@ class Utils(commands.Cog):
 
 def teardown(bot: PeaceBot):
     del sys.modules["bot.utils.embed_flag_input"]
+
 
 def setup(bot: PeaceBot):
     bot.add_cog(Utils(bot))
