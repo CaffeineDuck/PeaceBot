@@ -15,14 +15,17 @@ watchgod = "*"
 autopep8 = "*"
 "akinator.py" = "*"
 cachetools = "*"
-pynacl = "*"
-youtube-dl = "*"
+PyNaCl = "*"
+youtube_dl = "*"
 psutil = "*"
+PyPika = "*"
+discord-flags = "*"
 
 [dev-packages]
+rope = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.8.6"
 
 [packages.tortoise-orm]
 extras = [ "asyncpg",]

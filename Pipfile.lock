@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "a9036afa23b9b4f7b3819f696ad06f351b2bfed2b563c15b3662afc45c011623"
+            "sha256": "d3ec3a9a344a5bbc22f9eed15d8a836dd3afe482fe96c8a5728bab9ee92de485"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.8"
+            "python_version": "3.8.6"
         },
         "sources": [
             {
@@ -244,6 +244,14 @@
             ],
             "version": "==0.8.1"
         },
+        "discord-flags": {
+            "hashes": [
+                "sha256:0fba0574fd21f29cb395f1bf66251d6f0b8415a50c160f1363589300e0174848",
+                "sha256:91075d38cfe2a2b7be6cff656645ebbcde7ee3afe402c69d5163f2021f6c1d04"
+            ],
+            "index": "pypi",
+            "version": "==2.1.1"
+        },
         "discord.py": {
             "hashes": [
                 "sha256:3df148daf6fbcc7ab5b11042368a3cd5f7b730b62f09fb5d3cbceff59bcfbb12",
@@ -441,6 +449,13 @@
             ],
             "version": "==2.4.7"
         },
+        "pypika": {
+            "hashes": [
+                "sha256:8bdf5265076628c10e1ea2d0306d68f0559e27c5d3253b696778d191057ef7b0"
+            ],
+            "index": "pypi",
+            "version": "==0.48.0"
+        },
         "pypika-tortoise": {
             "hashes": [
                 "sha256:7176e98ff0cf7c311d4ba58f28f1755956265dee2f9781e65e1304a67a3e5aa5",
@@ -615,5 +630,13 @@
             "version": "==2021.3.25"
         }
     },
-    "develop": {}
+    "develop": {
+        "rope": {
+            "hashes": [
+                "sha256:786b5c38c530d4846aa68a42604f61b4e69a493390e3ca11b88df0fbfdc3ed04"
+            ],
+            "index": "pypi",
+            "version": "==0.18.0"
+        }
+    }
 }
