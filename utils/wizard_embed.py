@@ -1,3 +1,8 @@
+"""
+Author of the following code:
+https://github.com/falsedev
+"""
+
 import re
 
 import asyncio

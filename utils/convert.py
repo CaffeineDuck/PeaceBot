@@ -1,3 +1,7 @@
+"""
+Author of the following code:
+https://github.com/falsedev
+"""
 from typing import Callable, List, Optional, Type, Union
 from enum import Enum
 
