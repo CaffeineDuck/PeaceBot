@@ -6,7 +6,6 @@ from discord.ext import commands
 from discord.ext.commands import BucketType
 
 
-
 class NoSnipeableMessage(commands.CommandError):
     def __str__(self):
         return "There aren't any recent message that have been deleted/ edited!"
@@ -21,14 +20,14 @@ class Snipe(commands.Cog):
     @commands.Cog.listener()
     async def on_message_delete(self, message):
         if message.author.bot:
-            return 
+            return
 
         self.delete_snipes[message.channel] = message
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         if before.author.bot:
-            return 
+            return
 
         self.edit_snipes[after.channel] = (before, after)
 
