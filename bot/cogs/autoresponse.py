@@ -42,9 +42,9 @@ class AutoResponses(commands.Cog):
     async def cog_after_invoke(self, ctx: commands.Context) -> None:
         if ctx.command == self.autoresponse_list:
             return
-        await self.update_autoresponse_cache(ctx)
+        await self._update_autoresponse_cache(ctx)
 
-    async def update_autoresponse_cache(
+    async def _update_autoresponse_cache(
         self, ctx: commands.Context
     ) -> List[AutoResponseModel]:
         autoresponses = await AutoResponseModel.filter(guild__id=ctx.guild.id)
@@ -52,7 +52,7 @@ class AutoResponses(commands.Cog):
         ctx.autoresponses = autoresponses
         return autoresponses
 
-    async def autoresponse_message_formatter(
+    async def _autoresponse_message_formatter(
         self, message: discord.Message, response: str
     ) -> str:
         """Formats the string to a valid message
@@ -98,7 +98,7 @@ class AutoResponses(commands.Cog):
             )
         return updated_message
 
-    async def autoresponse_error_handler(
+    async def _autoresponse_error_handler(
         self, message: discord.Message, error: Exception
     ):
         title = " ".join(re.compile(r"[A-Z][a-z]*").findall(error.__class__.__name__))
@@ -117,7 +117,7 @@ class AutoResponses(commands.Cog):
 
         if not autoresponses:
             ctx = await self.bot.get_context(msg)
-            autoresponses = await self.update_autoresponse_cache(ctx)
+            autoresponses = await self._update_autoresponse_cache(ctx)
 
         try:
             # Gets the first autoresponse object if the sent message is an autoresponse trigge
@@ -134,7 +134,7 @@ class AutoResponses(commands.Cog):
 
         try:
             if filtered_autoresponse.extra_arguements:
-                output = await self.autoresponse_message_formatter(
+                output = await self._autoresponse_message_formatter(
                     msg, filtered_autoresponse.response
                 )
             elif filtered_autoresponse.trigger == msg.content:
@@ -144,7 +144,7 @@ class AutoResponses(commands.Cog):
             await msg.channel.send(output)
 
         except Exception as error:
-            await self.autoresponse_error_handler(msg, error)
+            await self._autoresponse_error_handler(msg, error)
 
     @commands.group(aliases=["autoresponses"])
     @commands.guild_only()

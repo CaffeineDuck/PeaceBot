@@ -1,8 +1,10 @@
 from datetime import datetime
 
+from cachetools import TTLCache
 from discord import Color, Embed
 from discord.ext import commands
 from discord.ext.commands import BucketType
+
 
 
 class NoSnipeableMessage(commands.CommandError):
@@ -13,20 +15,20 @@ class NoSnipeableMessage(commands.CommandError):
 class Snipe(commands.Cog):
     def __init__(self, bot, *args, **kwargs):
         self.bot = bot
-        self.delete_snipes = {}
-        self.edit_snipes = {}
+        self.delete_snipes = TTLCache(100, 600)
+        self.edit_snipes = TTLCache(100, 600)
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
         if message.author.bot:
-            return None
+            return 
 
         self.delete_snipes[message.channel] = message
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         if before.author.bot:
-            return None
+            return 
 
         self.edit_snipes[after.channel] = (before, after)
 
