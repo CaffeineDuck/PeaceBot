@@ -7,7 +7,7 @@ from discord import Embed, Color
 from discord.ext import commands
 from discord.ext.commands import BucketType
 
-from ..bot import PeaceBot
+from bot.bot import PeaceBot
 from models import AutoResponseModel, GuildModel
 from bot.utils.wizard_embed import Prompt, Wizard
 from config.personal_guild import personal_guild
