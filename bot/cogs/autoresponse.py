@@ -11,14 +11,10 @@ from bot.bot import PeaceBot
 from models import AutoResponseModel, GuildModel
 from bot.utils.wizard_embed import Prompt, Wizard
 from config.personal_guild import personal_guild
-
-
-class AutoResponseError(commands.CommandError):
-    def __init__(self, message: str):
-        self.message = message
-
-    def __str__(self):
-        return self.message
+from bot.utils.autoresponse_handler import (
+    autoresponse_message_formatter,
+    AutoResponseError,
+)
 
 
 class AutoResponses(commands.Cog):
@@ -51,52 +47,6 @@ class AutoResponses(commands.Cog):
         self.autoresponse_cache[ctx.guild.id] = autoresponses
         ctx.autoresponses = autoresponses
         return autoresponses
-
-    async def _autoresponse_message_formatter(
-        self, message: discord.Message, response: str
-    ) -> str:
-        """Formats the string to a valid message
-
-        Args:
-            message (str): Message object to format the string
-            response (str): String to format using `message (str)`
-
-        Returns:
-            str: Converted string
-
-        Raises:
-            KeyError, AttributeError
-        """
-        try:
-            # Checks if the mentions is needed in response
-            mentioned = message.mentions[0] if "{mentioned}" in response else None
-        except IndexError:
-            raise AutoResponseError("You need to mention someone for this to work!")
-
-        message_content = (
-            " ".join(message.content.split(" ")[1:])
-            if "{message}" in response
-            else None
-        )
-
-        if message_content == "":
-            raise AutoResponseError(
-                "You need to write some extra message for this to work!"
-            )
-
-        try:
-            updated_message = response.format(
-                author=message.author,
-                message=message_content,
-                raw_message=message,
-                server=message.guild,
-                mentioned=mentioned.mention,
-            )
-        except KeyError as error:
-            raise AutoResponseError(
-                f"""{str(error).replace("'", "`")} is not a valid arguement!"""
-            )
-        return updated_message
 
     async def _autoresponse_error_handler(
         self, message: discord.Message, error: Exception
@@ -134,7 +84,7 @@ class AutoResponses(commands.Cog):
 
         try:
             if filtered_autoresponse.extra_arguements:
-                output = await self._autoresponse_message_formatter(
+                output = await self.autoresponse_message_formatter(
                     msg, filtered_autoresponse.response
                 )
             elif filtered_autoresponse.trigger == msg.content:
