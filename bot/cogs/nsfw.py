@@ -1,10 +1,6 @@
-import pickle
 import random
-import traceback
 
-import aiofiles
 import asyncpraw
-import discord
 from discord.ext import commands, tasks
 
 from bot.utils.cached_reddit import RedditPostCacher

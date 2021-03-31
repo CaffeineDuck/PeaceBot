@@ -5,9 +5,21 @@ https://github.com/falsedev
 from enum import Enum
 from typing import Callable, List, Optional, Type, Union
 
-from discord import (CategoryChannel, Color, Embed, Emoji, Invite, Member,
-                     Message, PartialEmoji, Reaction, Role, TextChannel, User,
-                     VoiceChannel)
+from discord import (
+    CategoryChannel,
+    Color,
+    Embed,
+    Emoji,
+    Invite,
+    Member,
+    Message,
+    PartialEmoji,
+    Reaction,
+    Role,
+    TextChannel,
+    User,
+    VoiceChannel,
+)
 from discord.ext import commands
 from discord.utils import escape_markdown, escape_mentions
 

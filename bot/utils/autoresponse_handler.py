@@ -14,7 +14,9 @@ class AutoResponseError(commands.CommandError):
 
 
 class AutoResponseHandler:
-    def __init__(self, bot: PeaceBot, message: discord.Message, autoresponse_cache: TTLCache):
+    def __init__(
+        self, bot: PeaceBot, message: discord.Message, autoresponse_cache: TTLCache
+    ):
         self._bot = bot
         self._message = message
         self._guild_id = message.guild.id

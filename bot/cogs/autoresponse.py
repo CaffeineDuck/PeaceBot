@@ -8,8 +8,7 @@ from discord.ext import commands
 from discord.ext.commands import BucketType
 
 from bot.bot import PeaceBot
-from bot.utils.autoresponse_handler import (AutoResponseError,
-                                            AutoResponseHandler)
+from bot.utils.autoresponse_handler import AutoResponseError, AutoResponseHandler
 from bot.utils.wizard_embed import Prompt, Wizard
 from config.personal_guild import personal_guild
 from models import AutoResponseModel, GuildModel
@@ -45,7 +44,9 @@ class AutoResponses(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, msg: discord.Message):
-        autoresponse_handler = AutoResponseHandler(self.bot, msg, self.autoresponse_cache)
+        autoresponse_handler = AutoResponseHandler(
+            self.bot, msg, self.autoresponse_cache
+        )
 
         output = await autoresponse_handler.run()
         self.autoresponse_cache = autoresponse_handler.autoresponse_models_cache
