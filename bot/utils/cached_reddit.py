@@ -34,6 +34,7 @@ class RedditPostCacher:
         data_to_dump = dict()
         for subreddit in subreddits:
             await subreddit.load()
+
             posts = [
                 {
                     "url": post.url,

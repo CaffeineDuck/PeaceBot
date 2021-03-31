@@ -11,10 +11,7 @@ from bot.bot import PeaceBot
 from models import AutoResponseModel, GuildModel
 from bot.utils.wizard_embed import Prompt, Wizard
 from config.personal_guild import personal_guild
-from bot.utils.autoresponse_handler import (
-    autoresponse_message_formatter,
-    AutoResponseError,
-)
+from bot.utils.autoresponse_handler import AutoResponseError, AutoResponseHandler
 
 
 class AutoResponses(commands.Cog):
@@ -38,63 +35,29 @@ class AutoResponses(commands.Cog):
     async def cog_after_invoke(self, ctx: commands.Context) -> None:
         if ctx.command == self.autoresponse_list:
             return
-        await self._update_autoresponse_cache(ctx)
-
-    async def _update_autoresponse_cache(
-        self, ctx: commands.Context
-    ) -> List[AutoResponseModel]:
-        autoresponses = await AutoResponseModel.filter(guild__id=ctx.guild.id)
-        self.autoresponse_cache[ctx.guild.id] = autoresponses
-        ctx.autoresponses = autoresponses
-        return autoresponses
-
-    async def _autoresponse_error_handler(
-        self, message: discord.Message, error: Exception
-    ):
-        title = " ".join(re.compile(r"[A-Z][a-z]*").findall(error.__class__.__name__))
-        description = str(error)
-
-        await message.channel.send(
-            embed=Embed(title=title, description=str(error), color=Color.red())
+        (
+            autoresponses,
+            cache,
+        ) = await AutoResponseHandler.update_provided_autoresponse_cache(
+            ctx.guild.id, self.autoresponse_cache
         )
+        self.autoresponse_cache = cache
 
     @commands.Cog.listener()
     async def on_message(self, msg: discord.Message):
-        if msg.author.bot or msg.embeds or not msg.content:
+        autoresponse_handler = AutoResponseHandler()
+        await autoresponse_handler.start(self.bot, msg, self.autoresponse_cache)
+
+        if not autoresponse_handler.message_is_valid():
             return
 
-        autoresponses = self.autoresponse_cache.get(msg.guild.id)
+        output = await autoresponse_handler.run()
+        self.autoresponse_cache = autoresponse_handler.autoresponse_models_cache
 
-        if not autoresponses:
-            ctx = await self.bot.get_context(msg)
-            autoresponses = await self._update_autoresponse_cache(ctx)
-
-        try:
-            # Gets the first autoresponse object if the sent message is an autoresponse trigge
-            filtered_autoresponse = (
-                [
-                    autoresponse
-                    for autoresponse in autoresponses
-                    if autoresponse.trigger == msg.content.split(" ")[0].lower()
-                    and autoresponse.enabled
-                ]
-            )[0]
-        except IndexError or TypeError:
+        if not output:
             return
 
-        try:
-            if filtered_autoresponse.extra_arguements:
-                output = await self.autoresponse_message_formatter(
-                    msg, filtered_autoresponse.response
-                )
-            elif filtered_autoresponse.trigger == msg.content:
-                output = filtered_autoresponse.response
-            else:
-                return
-            await msg.channel.send(output)
-
-        except Exception as error:
-            await self._autoresponse_error_handler(msg, error)
+        await msg.channel.send(output)
 
     @commands.group(aliases=["autoresponses"])
     @commands.guild_only()
