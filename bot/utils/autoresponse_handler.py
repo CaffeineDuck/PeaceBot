@@ -14,46 +14,44 @@ class AutoResponseError(commands.CommandError):
 
 
 class AutoResponseHandler:
-    async def start(
-        self, bot: PeaceBot, message: discord.Message, autoresponse_cache: TTLCache
-    ):
-        self.bot = bot
-        self.message = message
-        self.guild_id = message.guild.id
-        self.autoresponse_cache = autoresponse_cache
+    def __init__(self, bot: PeaceBot, message: discord.Message, autoresponse_cache: TTLCache):
+        self._bot = bot
+        self._message = message
+        self._guild_id = message.guild.id
+        self._autoresponse_cache = autoresponse_cache
 
     @property
     def autoresponse_models_cache(self):
-        return self.autoresponse_cache
+        return self._autoresponse_cache
 
     @autoresponse_models_cache.setter
     def autoresponse_models_cache(self, autoresponse_cache: TTLCache):
-        self.autoresponse_cache = autoresponse_cache
+        self._autoresponse_cache = autoresponse_cache
 
     @property
     def discord_message(self):
-        return self.message
+        return self._message
 
     @discord_message.setter
     def discord_message(self, new_message: discord.Message):
-        self.message = new_message
+        self._message = new_message
 
     @property
     async def autoresponses(self):
-        return await self.guild_autoresponses(self.guild_id)
+        return await self.guild_autoresponses(self._guild_id)
 
     @property
     async def filtered_autoresponses(self):
         return await self.guild_filtered_autoresponses(await self.autoresponses)
 
     async def message_is_valid(self):
-        message = self.message
+        message = self._message
         if message.author.bot or message.embeds or not message.content:
             return False
         return True
 
     async def guild_autoresponses(self, guild_id: int):
-        autoresponses = self.autoresponse_cache.get(guild_id)
+        autoresponses = self._autoresponse_cache.get(guild_id)
         if not autoresponses:
             autoresponses = await self.update_autoresponse_cache(guild_id)
         return autoresponses
@@ -68,7 +66,7 @@ class AutoResponseHandler:
                     autoresponse
                     for autoresponse in guild_autoresponses
                     if autoresponse.trigger
-                    == self.message.content.split(" ")[0].lower()
+                    == self._message.content.split(" ")[0].lower()
                     and autoresponse.enabled
                 ]
             )[0]
@@ -85,7 +83,7 @@ class AutoResponseHandler:
         embed = discord.Embed(
             title=title, description=str(error), color=discord.Color.red()
         )
-        await self.message.channel.send(embed=embed)
+        await self._message.channel.send(embed=embed)
 
     @staticmethod
     async def update_provided_autoresponse_cache(
@@ -97,12 +95,12 @@ class AutoResponseHandler:
 
     async def update_autoresponse_cache(self, guild_id: int) -> List[AutoResponseModel]:
         autoresponses, cache = await self.update_provided_autoresponse_cache(
-            guild_id, self.autoresponse_cache
+            guild_id, self._autoresponse_cache
         )
-        self.autoresponse_cache = cache
+        self._autoresponse_cache = cache
         return autoresponses
 
-    async def autoresponse_message_formatter(
+    async def _autoresponse_message_formatter(
         self, message: discord.Message, response: str
     ) -> str:
         try:
@@ -136,12 +134,12 @@ class AutoResponseHandler:
             )
         return updated_message
 
-    async def extra_arguements_handler(self, autoresponse_model: AutoResponseModel):
+    async def _extra_arguements_handler(self, autoresponse_model: AutoResponseModel):
         if autoresponse_model.extra_arguements:
-            output = await self.autoresponse_message_formatter(
-                self.message, autoresponse_model.response
+            output = await self._autoresponse_message_formatter(
+                self._message, autoresponse_model.response
             )
-        elif autoresponse_model.trigger == self.message.content:
+        elif autoresponse_model.trigger == self._message.content:
             output = autoresponse_model.response
 
         if output:
@@ -149,17 +147,20 @@ class AutoResponseHandler:
 
     async def run(self):
         try:
+            if not self.message_is_valid():
+                return
+
             filtered_autoresponses = await self.filtered_autoresponses
 
             if not filtered_autoresponses:
-                await self.update_autoresponse_cache(self.guild_id)
+                await self.update_autoresponse_cache(self._guild_id)
                 filtered_autoresponses = await self.filtered_autoresponses
 
             if not filtered_autoresponses:
                 return
 
-            output = await self.extra_arguements_handler(filtered_autoresponses)
+            output = await self._extra_arguements_handler(filtered_autoresponses)
             return output
 
         except Exception as error:
-            await self._autoresponse_error_handler(self.message, error)
+            await self._autoresponse_error_handler(self._message, error)

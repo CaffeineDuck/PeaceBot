@@ -35,21 +35,16 @@ class AutoResponses(commands.Cog):
     async def cog_after_invoke(self, ctx: commands.Context) -> None:
         if ctx.command == self.autoresponse_list:
             return
-        (
-            autoresponses,
-            cache,
-        ) = await AutoResponseHandler.update_provided_autoresponse_cache(
-            ctx.guild.id, self.autoresponse_cache
-        )
+        cache = (
+            await AutoResponseHandler.update_provided_autoresponse_cache(
+                ctx.guild.id, self.autoresponse_cache
+            )
+        )[1]
         self.autoresponse_cache = cache
 
     @commands.Cog.listener()
     async def on_message(self, msg: discord.Message):
-        autoresponse_handler = AutoResponseHandler()
-        await autoresponse_handler.start(self.bot, msg, self.autoresponse_cache)
-
-        if not autoresponse_handler.message_is_valid():
-            return
+        autoresponse_handler = AutoResponseHandler(self.bot, msg, self.autoresponse_cache)
 
         output = await autoresponse_handler.run()
         self.autoresponse_cache = autoresponse_handler.autoresponse_models_cache
