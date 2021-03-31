@@ -23,6 +23,7 @@ discord-flags = "*"
 
 [dev-packages]
 rope = "*"
+isort = "*"
 
 [requires]
 python_version = "3.8.6"
