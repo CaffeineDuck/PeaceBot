@@ -2,12 +2,10 @@ import re
 from asyncio import Event
 
 import aiohttp
-from discord import PartialEmoji, Embed, Color, Message, PartialEmoji, HTTPException
-from discord.ext import commands
-from discord.ext.commands import BucketType
-from discord.ext.commands import Greedy
-
 from __main__ import PeaceBot
+from discord import Color, Embed, HTTPException, Message, PartialEmoji
+from discord.ext import commands
+from discord.ext.commands import BucketType, Greedy
 
 
 class Emoji(commands.Cog):

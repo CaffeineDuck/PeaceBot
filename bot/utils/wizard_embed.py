@@ -3,13 +3,12 @@ Author of the following code:
 https://github.com/falsedev
 """
 
-import re
-
 import asyncio
 import inspect
+import re
 from datetime import datetime
 from enum import Enum
-from typing import Callable, List, Optional, Type, Mapping, Union
+from typing import Callable, List, Mapping, Optional, Type, Union
 
 from discord import Color, Embed, Member, Message, Reaction, User
 from discord.abc import Messageable

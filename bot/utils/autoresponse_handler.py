@@ -147,7 +147,7 @@ class AutoResponseHandler:
 
     async def run(self):
         try:
-            if not self.message_is_valid():
+            if not await self.message_is_valid():
                 return
 
             filtered_autoresponses = await self.filtered_autoresponses

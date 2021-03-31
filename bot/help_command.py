@@ -1,6 +1,6 @@
-from typing import Mapping, Optional, List
+from typing import List, Mapping, Optional
 
-from discord import Embed, Color
+from discord import Color, Embed
 from discord.ext import commands
 
 INVISIBLE_COGS = ["ErrorHandler", "Jishaku", "PersonalGuild"]

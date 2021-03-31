@@ -1,12 +1,12 @@
 import asyncio
 import random
-import discord
 from typing import Union
 
+import discord
 from akinator.async_aki import Akinator
-from discord.ext.commands import BucketType, Context
-from discord import Color, Embed, Message, Member
+from discord import Color, Embed, Member, Message
 from discord.ext import commands
+from discord.ext.commands import BucketType, Context
 
 HTTP_ERROR_VALID_RANGES = (
     (100, 102),

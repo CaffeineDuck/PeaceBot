@@ -1,13 +1,11 @@
+import json
 import random
 
-from discord import Member
-from discord.ext import commands
-from discord.ext.commands import Greedy
-from discord.ext.commands import BucketType
-
-import json
 import aiohttp
 import discord
+from discord import Member
+from discord.ext import commands
+from discord.ext.commands import BucketType, Greedy
 
 
 class Fun(commands.Cog):

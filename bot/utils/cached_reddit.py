@@ -1,13 +1,13 @@
-import aiofiles
 import os
 import pickle
 import random
+from typing import Dict, List
+
+import aiofiles
+import discord
 from asyncpraw import Reddit
 from asyncpraw.models import Submission
-from typing import List, Dict
-
-import discord
-from discord.ext import tasks, commands
+from discord.ext import commands, tasks
 
 from config.reddit import reddit_config
 

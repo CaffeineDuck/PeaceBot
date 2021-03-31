@@ -2,11 +2,11 @@ import platform
 import sys
 
 import psutil
-from discord import __version__ as discord_version
+from __main__ import PeaceBot
 from discord import Color, Embed, NotFound
+from discord import __version__ as discord_version
 from discord.ext import commands
 
-from __main__ import PeaceBot
 from models import GuildModel
 
 

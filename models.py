@@ -1,6 +1,6 @@
-from tortoise import Model, fields
 from discord import Guild
 from discord.ext.commands import Context
+from tortoise import Model, fields
 
 from config.bot import bot_config
 
