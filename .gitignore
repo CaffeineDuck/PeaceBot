@@ -1,7 +1,7 @@
 /.vscode
 .env
 /migrations
-/cache/**.**
+/cache/**.pickle
 **/**/__pycache__
 
 /scripts
