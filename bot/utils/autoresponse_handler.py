@@ -107,7 +107,7 @@ class AutoResponseHandler:
     ) -> str:
         try:
             # Checks if the mentions is needed in response
-            mentioned = message.mentions[0] if "{mentioned}" in response else None
+            mentioned = message.mentions[0] if "{mentioned" in response else None
         except IndexError:
             raise AutoResponseError("You need to mention someone for this to work!")
 
@@ -128,7 +128,7 @@ class AutoResponseHandler:
                 message=message_content,
                 raw_message=message,
                 server=message.guild,
-                mentioned=mentioned.mention,
+                mentioned=mentioned,
             )
         except KeyError as error:
             raise AutoResponseError(
