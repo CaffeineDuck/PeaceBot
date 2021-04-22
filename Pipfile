@@ -20,6 +20,7 @@ youtube_dl = "*"
 psutil = "*"
 PyPika = "*"
 discord-flags = "*"
+fastapi = "*"
 
 [dev-packages]
 rope = "*"
@@ -30,3 +31,6 @@ python_version = "3.8.6"
 
 [packages.tortoise-orm]
 extras = [ "asyncpg",]
+
+[packages.uvicorn]
+extras = [ "standard",]
