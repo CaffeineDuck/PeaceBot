@@ -68,7 +68,7 @@ class Utils(commands.Cog):
         else:
             acknowledgements = "Member"
 
-        roles = (" ".join(roles_list)) if roles_list else '@everyone'
+        roles = (" ".join(roles_list)) if roles_list else "@everyone"
         permissions = ", ".join(permissions)
 
         embed = discord.Embed(
