@@ -91,7 +91,17 @@ class AutoResponses(commands.Cog):
     @commands.cooldown(1, 60, BucketType.user)
     @autoresponse.command(name="add", aliases=["addresponses", "addautoresponses"])
     async def autoresponse_add(self, ctx: commands.Context):
-        """Add new autoresponse"""
+        """
+        Add new autoresponse
+
+        **Allowed Variables:**
+        Message Author: `author`
+        Message Content: `message`
+        Server: `server`
+        Mentioned Person: `mentioned`
+
+        *Note: Use `{` `}`for variables. Eg: `Hi {author.mention}`*
+        """
         guild = await GuildModel.from_context(ctx)
         prompts = [
             Prompt("Triggered With", description="What shall be the trigger?"),
