@@ -42,6 +42,52 @@ class Utils(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.command(aliases=["user", "info"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def whois(self, ctx: commands.Context, user: Optional[discord.Member]):
+        user = user or ctx.author
+
+        fmt = "%a, %b %d, %Y, %I:%M %p"
+        created_at = user.created_at.strftime(fmt)
+        joined_at = user.joined_at.strftime(fmt)
+
+        roles_list = [role.mention for role in user.roles][1:][::-1]
+        # Gets the formatted user's permissions in a list
+        permissions = [
+            (" ".join(permission[0].split("_"))).title()
+            for permission in user.guild_permissions
+            if permission[1]
+        ]
+
+        if user == ctx.guild.owner:
+            acknowledgements = "Server Owner"
+        elif "Administrator" in permissions:
+            acknowledgements = "Administrator"
+        elif "Manage Server" in permissions:
+            acknowledgements = "Moderator"
+        else:
+            acknowledgements = "Member"
+
+        roles = (" ".join(roles_list)) if roles_list else '@everyone'
+        permissions = ", ".join(permissions)
+
+        embed = discord.Embed(
+            description=user.mention,
+            timestamp=ctx.message.created_at,
+            colour=discord.Color.blue(),
+        )
+        embed.set_author(name=user, url=user.avatar_url, icon_url=user.avatar_url)
+        embed.add_field(name="**Joined**", value=joined_at, inline=True)
+        embed.add_field(name="**Registered**", value=created_at, inline=True)
+        embed.add_field(name=f"**Roles**[{len(roles_list)}]", value=roles, inline=False)
+        embed.add_field(name="**Permissions**", value=permissions, inline=False)
+        embed.add_field(
+            name="**Acknowledgements**", value=acknowledgements, inline=False
+        )
+        embed.set_thumbnail(url=user.avatar_url)
+        embed.set_footer(text=f"ID: {user.id}")
+        await ctx.send(embed=embed)
+
     """
     Source of the following code:
     https://github.com/falsedev/tech-struck
