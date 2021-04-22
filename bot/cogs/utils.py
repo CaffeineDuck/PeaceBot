@@ -63,7 +63,7 @@ class Utils(commands.Cog):
             acknowledgements = "Server Owner"
         elif "Administrator" in permissions:
             acknowledgements = "Administrator"
-        elif "Manage Server" in permissions:
+        elif "Manage Guild" in permissions:
             acknowledgements = "Moderator"
         else:
             acknowledgements = "Member"
