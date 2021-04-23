@@ -79,14 +79,14 @@ class AutoResponseHandler:
     async def _autoresponse_error_handler(
         self, message: discord.Message, error: Exception
     ):
-        title = " ".join(re.compile(r"[A-Z][a-z]*").findall(error.__class__.__name__))
+        title = " ".join(re.compile(
+            r"[A-Z][a-z]*").findall(error.__class__.__name__))
         description = str(error)
 
         embed = discord.Embed(
             title=title, description=str(error), color=discord.Color.red()
         )
         await self._message.channel.send(embed=embed)
-        raise error
 
     @staticmethod
     async def update_provided_autoresponse_cache(
@@ -110,7 +110,8 @@ class AutoResponseHandler:
             # Checks if the mentions is needed in response
             mentioned = message.mentions[0] if "{mentioned" in response else None
         except IndexError:
-            raise AutoResponseError("You need to mention someone for this to work!")
+            raise AutoResponseError(
+                "You need to mention someone for this to work!")
 
         message_content = (
             " ".join(message.content.split(" ")[1:])
@@ -138,11 +139,13 @@ class AutoResponseHandler:
         return updated_message
 
     async def _extra_arguements_handler(self, autoresponse_model: AutoResponseModel):
-        if autoresponse_model.extra_arguements:
+        if autoresponse_model.has_variables:
             output = await self._autoresponse_message_formatter(
                 self._message, autoresponse_model.response
             )
         elif autoresponse_model.trigger == self._message.content:
+            output = autoresponse_model.response
+        elif autoresponse_model.extra_arguements and self._message.content.split(' ')[0] == autoresponse_model.trigger:
             output = autoresponse_model.response
         else:
             output = None
