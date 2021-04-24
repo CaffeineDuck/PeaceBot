@@ -295,7 +295,7 @@ class AutoResponses(commands.Cog):
 
         await self.clone_autoresponse(autoresponse, guild, user)
         self.autoresponse_cache = (
-            AutoResponseHandler.update_provided_autoresponse_cache(
+            await AutoResponseHandler.update_provided_autoresponse_cache(
                 ctx.guild.id, self.autoresponse_cache
             )
         )
