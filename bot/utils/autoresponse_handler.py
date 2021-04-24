@@ -83,6 +83,7 @@ class AutoResponseHandler:
             title=title, description=str(error), color=discord.Color.red()
         )
         await self._message.channel.send(embed=embed)
+        raise error
 
     @staticmethod
     async def update_provided_autoresponse_cache(

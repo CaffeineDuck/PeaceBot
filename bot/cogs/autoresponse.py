@@ -81,7 +81,8 @@ class AutoResponses(commands.Cog):
         ]
 
         if not record:
-            raise AutoResponseError("This autoresponse doesnot exist in this guild!")
+            raise AutoResponseError(
+                "This autoresponse doesnot exist in this guild!")
 
         # Getting the first value from the record as record is a list
         record = record[0]
@@ -194,7 +195,8 @@ class AutoResponses(commands.Cog):
         ]
 
         if not autoresponse:
-            raise AutoResponseError("This autoresponse doesnot exist in this guild!")
+            raise AutoResponseError(
+                "This autoresponse doesnot exist in this guild!")
 
         prompts = [
             Prompt(
@@ -228,7 +230,8 @@ class AutoResponses(commands.Cog):
                 if autoresponse.trigger == trigger
             ][0]
         except IndexError:
-            raise AutoResponseError("This autoresponse doesnot exist in this guild!")
+            raise AutoResponseError(
+                "This autoresponse doesnot exist in this guild!")
 
         return autoresponse
 
@@ -244,8 +247,10 @@ class AutoResponses(commands.Cog):
             color=discord.Color.gold(),
         )
         embed.add_field(name="ID:", value=autoresponse.id, inline=False)
-        embed.add_field(name="Trigger:", value=autoresponse.trigger, inline=False)
-        embed.add_field(name="Response:", value=autoresponse.response, inline=False)
+        embed.add_field(name="Trigger:",
+                        value=autoresponse.trigger, inline=False)
+        embed.add_field(name="Response:",
+                        value=autoresponse.response, inline=False)
         embed.add_field(
             name="Accepts Extra Arguements:",
             value=autoresponse.extra_arguements,
@@ -254,7 +259,8 @@ class AutoResponses(commands.Cog):
         embed.add_field(
             name="Has Variables:", value=autoresponse.has_variables, inline=False
         )
-        embed.add_field(name="Created By:", value=f"<@{created_by.id}>", inline=False)
+        embed.add_field(name="Created By:",
+                        value=f"<@{created_by.id}>", inline=False)
 
         await ctx.reply(embed=embed)
 
@@ -266,7 +272,7 @@ class AutoResponses(commands.Cog):
     async def clone_autoresponse(
         self, previous_model: AutoResponseModel, guild: GuildModel, user: UserModel
     ):
-        await AutoResponseModel.get_or_create(
+        new_model, _ = await AutoResponseModel.get_or_create(
             guild=guild,
             created_by=user,
             trigger=previous_model.trigger,
@@ -275,6 +281,7 @@ class AutoResponses(commands.Cog):
             has_variables=previous_model.has_variables,
             enabled=True,
         )
+        return new_model
 
     @autoresponse.command(name="import")
     async def autoresponse_import(
@@ -296,12 +303,9 @@ class AutoResponses(commands.Cog):
         guild = await GuildModel.get(id=ctx.guild.id)
         user, _ = await UserModel.get_or_create(id=ctx.author.id)
 
-        await self.clone_autoresponse(autoresponse, guild, user)
-        self.autoresponse_cache = (
-            await AutoResponseHandler.update_provided_autoresponse_cache(
-                ctx.guild.id, self.autoresponse_cache
-            )
-        )
+        new_model = await self.clone_autoresponse(autoresponse, guild, user)
+        ctx.autoresponses.append(new_model)
+        
         await ctx.invoke(self.autoresponse_info, trigger=autoresponse.trigger)
 
     @autoresponse.command(name="exportall")
@@ -331,7 +335,8 @@ class AutoResponses(commands.Cog):
             await f.write(pickle.dumps(autoresponses))
 
         await ctx.reply(
-            file=discord.File(file_path, f"{ctx.guild.name}_autoresponses.pickle")
+            file=discord.File(
+                file_path, f"{ctx.guild.name}_autoresponses.pickle")
         )
         os.remove(file_path)
 
@@ -380,7 +385,8 @@ class AutoResponses(commands.Cog):
         disabled_autoresponses = ", ".join(disabled_autoresponses)
 
         # Sends the embed with all the enabled autoresponses for that server!
-        embed = discord.Embed(title="Autorespones", colour=discord.Color.gold())
+        embed = discord.Embed(title="Autorespones",
+                              colour=discord.Color.gold())
 
         embed.add_field(
             name="Enabled Autoresponses",
