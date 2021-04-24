@@ -11,7 +11,7 @@ from bot.bot import PeaceBot
 from bot.utils.autoresponse_handler import AutoResponseError, AutoResponseHandler
 from bot.utils.wizard_embed import Prompt, Wizard
 from config.personal_guild import personal_guild
-from models import AutoResponseModel, GuildModel
+from models import AutoResponseModel, GuildModel, UserModel
 
 
 class AutoResponses(commands.Cog):
@@ -77,7 +77,8 @@ class AutoResponses(commands.Cog):
         ]
 
         if not record:
-            raise AutoResponseError("This autoresponse doesnot exist in this guild!")
+            raise AutoResponseError(
+                "This autoresponse doesnot exist in this guild!")
 
         # Getting the first value from the record as record is a list
         record = record[0]
@@ -86,7 +87,7 @@ class AutoResponses(commands.Cog):
 
         toggle_str = "enabled" if toggle else "disabled"
 
-        await ctx.send(f"The autoresponse {trigger} has been {toggle_str}")
+        await ctx.send(f"The autoresponse `{trigger}` has been {toggle_str}")
 
     @commands.cooldown(1, 60, BucketType.user)
     @autoresponse.command(name="add", aliases=["addresponses", "addautoresponses"])
@@ -139,14 +140,14 @@ class AutoResponses(commands.Cog):
         record, _ = await AutoResponseModel.get_or_create(
             guild=guild, trigger=trigger.lower()
         )
+
         record.enabled = True
         record.response = response
         record.extra_arguements = extra_arguements
         record.has_variables = has_variables
+        record.created_by_id = ctx.author.id
 
-        await record.save(
-            update_fields=["enabled", "response", "extra_arguements", "has_variables"]
-        )
+        await record.save()
 
     @autoresponse.command(name="delete_all", aliases=["dall", "remall"])
     @commands.cooldown(1, 500, BucketType.user)
@@ -154,8 +155,26 @@ class AutoResponses(commands.Cog):
     async def autoresponse_delete_all(self, ctx: commands.Context):
         """Delete all the autoresponses in the guild"""
         guild = await GuildModel.from_context(ctx)
-        await AutoResponseModel.filter(guild=guild).delete()
-        await ctx.send("All autoresponses for this guild have been deleted!")
+        prompts = [
+            Prompt(
+                "Are you sure?",
+                description="React to say your message!",
+                out_type=bool,
+                reaction_interface=True,
+            )
+        ]
+        wizard = Wizard(
+            self.bot,
+            ctx.author,
+            prompts,
+            "Delete All Autoresponses",
+            completed_message="All Autoresponses in this guild deleted successfully!",
+        )
+        response = await wizard.run(ctx.channel)
+        if response:
+            await AutoResponseModel.filter(guild=guild).delete()
+        else:
+            await ctx.send('Aborted!')
 
     @autoresponse.command(name="delete", aliases=["delresponse", "del"])
     @commands.cooldown(1, 10, BucketType.user)
@@ -170,7 +189,8 @@ class AutoResponses(commands.Cog):
         ]
 
         if not autoresponse:
-            raise AutoResponseError("This autoresponse doesnot exist in this guild!")
+            raise AutoResponseError(
+                "This autoresponse doesnot exist in this guild!")
 
         prompts = [
             Prompt(
@@ -212,7 +232,8 @@ class AutoResponses(commands.Cog):
         disabled_autoresponses = ", ".join(disabled_autoresponses)
 
         # Sends the embed with all the enabled autoresponses for that server!
-        embed = discord.Embed(title="Autorespones", colour=discord.Color.gold())
+        embed = discord.Embed(title="Autorespones",
+                              colour=discord.Color.gold())
 
         embed.add_field(
             name="Enabled Autoresponses",
