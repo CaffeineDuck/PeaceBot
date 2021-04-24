@@ -286,7 +286,7 @@ class AutoResponses(commands.Cog):
             guild_autoresponse = await self.get_autoresponse(ctx, autoresponse.trigger)
         except AutoResponseError:
             pass
-        
+
         if guild_autoresponse:
             raise AutoResponseError("This autoresponse already exists in this server!")
 
