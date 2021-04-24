@@ -1,5 +1,6 @@
 import re
-from typing import List, Union
+import uuid
+from typing import List, Optional, Union
 
 import discord
 from cachetools import TTLCache
@@ -77,8 +78,7 @@ class AutoResponses(commands.Cog):
         ]
 
         if not record:
-            raise AutoResponseError(
-                "This autoresponse doesnot exist in this guild!")
+            raise AutoResponseError("This autoresponse doesnot exist in this guild!")
 
         # Getting the first value from the record as record is a list
         record = record[0]
@@ -141,9 +141,7 @@ class AutoResponses(commands.Cog):
             guild=guild, trigger=trigger.lower()
         )
 
-        user, _ = await UserModel.get_or_create(
-            id=ctx.guild.id
-        )
+        user, _ = await UserModel.get_or_create(id=ctx.author.id)
 
         record.enabled = True
         record.response = response
@@ -178,7 +176,7 @@ class AutoResponses(commands.Cog):
         if response:
             await AutoResponseModel.filter(guild=guild).delete()
         else:
-            await ctx.send('Aborted!')
+            await ctx.send("Aborted!")
 
     @autoresponse.command(name="delete", aliases=["delresponse", "del"])
     @commands.cooldown(1, 10, BucketType.user)
@@ -193,8 +191,7 @@ class AutoResponses(commands.Cog):
         ]
 
         if not autoresponse:
-            raise AutoResponseError(
-                "This autoresponse doesnot exist in this guild!")
+            raise AutoResponseError("This autoresponse doesnot exist in this guild!")
 
         prompts = [
             Prompt(
@@ -216,6 +213,112 @@ class AutoResponses(commands.Cog):
 
         await AutoResponseModel.get(guild=guild, trigger=trigger).delete()
 
+    async def get_autoresponse(
+        self,
+        ctx: commands.Context,
+        trigger: str,
+    ):
+        try:
+            autoresponse = [
+                autoresponse
+                for autoresponse in ctx.autoresponses
+                if autoresponse.trigger == trigger
+            ][0]
+        except IndexError:
+            raise AutoResponseError("This autoresponse doesnot exist in this guild!")
+
+        return autoresponse
+
+    @autoresponse.command(name="info")
+    async def autoresponse_info(self, ctx: commands.Context, trigger: str):
+        """Shows info about the certain autoresponse"""
+        autoresponse = await self.get_autoresponse(ctx, trigger)
+        created_by = await autoresponse.created_by.first()
+
+        embed = Embed(
+            title="AutoResponse Info",
+            description=f"Info about `{trigger}`",
+            color=discord.Color.gold(),
+        )
+        embed.add_field(name="ID:", value=autoresponse.id, inline=False)
+        embed.add_field(name="Trigger:", value=autoresponse.trigger, inline=False)
+        embed.add_field(name="Response:", value=autoresponse.response, inline=False)
+        embed.add_field(
+            name="Accepts Extra Arguements:",
+            value=autoresponse.extra_arguements,
+            inline=False,
+        )
+        embed.add_field(
+            name="Has Variables:", value=autoresponse.has_variables, inline=False
+        )
+        embed.add_field(name="Created By:", value=f"<@{created_by.id}>", inline=False)
+
+        await ctx.send(embed=embed)
+
+    @autoresponse.command(name="export")
+    async def autoresponse_export(self, ctx: commands.Context, trigger: str):
+        autoresponse = await self.get_autoresponse(ctx, trigger)
+        await ctx.send(f"```{autoresponse.id}```")
+
+    async def clone_autoresponse(
+        self, previous_model: AutoResponseModel, guild: GuildModel, user: UserModel
+    ):
+        await AutoResponseModel.get_or_create(
+            guild=guild,
+            created_by=user,
+            trigger=previous_model.trigger,
+            response=previous_model.response,
+            extra_arguements=previous_model.extra_arguements,
+            has_variables=previous_model.has_variables,
+            enabled=True,
+        )
+
+    @autoresponse.command(name="import")
+    async def autoresponse_import(
+        self, ctx: commands.Context, autoresponse_id: uuid.UUID
+    ):
+        autoresponse = await AutoResponseModel.get_or_none(id=autoresponse_id)
+
+        if not autoresponse:
+            raise AutoResponseError("This autoresponse doesnot exist!")
+
+        try:
+            guild_autoresponse = await self.get_autoresponse(ctx, autoresponse.trigger)
+        except AutoResponseError:
+            pass
+        
+        if guild_autoresponse:
+            raise AutoResponseError("This autoresponse already exists in this server!")
+
+        guild = await GuildModel.get(id=ctx.guild.id)
+        user, _ = await UserModel.get_or_create(id=ctx.author.id)
+
+        await self.clone_autoresponse(autoresponse, guild, user)
+        self.autoresponse_cache = (
+            AutoResponseHandler.update_provided_autoresponse_cache(
+                ctx.guild.id, self.autoresponse_cache
+            )
+        )
+        await ctx.invoke(self.autoresponse_info, trigger=autoresponse.trigger)
+
+    @autoresponse.command(name="exportall")
+    async def autoresponse_guild_export_all(self, ctx: commands.Context):
+        await ctx.send(f"```{ctx.guild.id}```")
+
+    @autoresponse.command(name="importall")
+    async def autoresponse_guild_import_all(self, ctx: commands.Context, guild_id: int):
+        previous_autoresponses = await AutoResponseModel.filter(guild__id=guild_id)
+
+        user, _ = await UserModel.get_or_create(id=ctx.author.id)
+        guild = await GuildModel.from_id(ctx.guild.id)
+        for pv_ar in previous_autoresponses:
+            await self.clone_autoresponse(pv_ar, guild, user)
+
+        discord_guild = self.bot.get_guild(guild_id)
+        await ctx.send(
+            f"All the autoresponses from server **{discord_guild.name}** have been imported!"
+        )
+
     @autoresponse.command(name="list", aliases=["show", "showall", "all"])
     async def autoresponse_list(self, ctx):
         """Shows the list of all the autoresponses"""
@@ -236,8 +339,7 @@ class AutoResponses(commands.Cog):
         disabled_autoresponses = ", ".join(disabled_autoresponses)
 
         # Sends the embed with all the enabled autoresponses for that server!
-        embed = discord.Embed(title="Autorespones",
-                              colour=discord.Color.gold())
+        embed = discord.Embed(title="Autorespones", colour=discord.Color.gold())
 
         embed.add_field(
             name="Enabled Autoresponses",

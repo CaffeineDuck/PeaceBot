@@ -12,6 +12,7 @@ class GuildModel(Model):
         default=bot_config.prefix,
         description="Custom prefix of the guild",
     )
+    users = fields.ManyToManyField("main.UserModel", related_name="Guild")
 
     @classmethod
     async def from_id(cls, guild_id: int):
@@ -32,6 +33,7 @@ class GuildModel(Model):
 
 class UserModel(Model):
     id = fields.BigIntField(pk=True, description="Discord ID of the user")
+    guild = fields.ManyToManyField("main.GuildModel", related_name="User")
 
     class Meta:
         table = "users"
@@ -57,7 +59,9 @@ class AutoResponseModel(Model):
         default=False, description="If the autoresponse output has variables"
     )
     guild = fields.ForeignKeyField("main.GuildModel", related_name="Autoresponses")
-    created_by = fields.ForeignKeyField('main.UserModel', related_name='Autoresponses', null=True)
+    created_by = fields.ForeignKeyField(
+        "main.UserModel", related_name="Autoresponses", null=True
+    )
 
     class Meta:
         table = "autoresponses"

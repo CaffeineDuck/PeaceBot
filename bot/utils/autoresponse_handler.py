@@ -61,14 +61,12 @@ class AutoResponseHandler:
     ):
         try:
             # Gets the first autoresponse object if the sent message is an autoresponse trigger
-            filtered_autoresponses = (
-                [
-                    autoresponse
-                    for autoresponse in guild_autoresponses
-                    if autoresponse.enabled
-                    and autoresponse.trigger.lower() in self._message.content.lower()
-                ]
-            )
+            filtered_autoresponses = [
+                autoresponse
+                for autoresponse in guild_autoresponses
+                if autoresponse.enabled
+                and autoresponse.trigger.lower() in self._message.content.lower()
+            ]
             # Sorts the autoresponses according to the length of trigger
             filtered_autoresponses.sort(key=lambda x: x.trigger, reverse=True)
             return filtered_autoresponses[0]
@@ -78,15 +76,13 @@ class AutoResponseHandler:
     async def _autoresponse_error_handler(
         self, message: discord.Message, error: Exception
     ):
-        title = " ".join(re.compile(
-            r"[A-Z][a-z]*").findall(error.__class__.__name__))
+        title = " ".join(re.compile(r"[A-Z][a-z]*").findall(error.__class__.__name__))
         description = str(error)
 
         embed = discord.Embed(
             title=title, description=str(error), color=discord.Color.red()
         )
-        # await self._message.channel.send(embed=embed)
-        raise error
+        await self._message.channel.send(embed=embed)
 
     @staticmethod
     async def update_provided_autoresponse_cache(
@@ -110,8 +106,7 @@ class AutoResponseHandler:
             # Checks if the mentions is needed in response
             mentioned = message.mentions[0] if "{mentioned" in response else None
         except IndexError:
-            raise AutoResponseError(
-                "You need to mention someone for this to work!")
+            raise AutoResponseError("You need to mention someone for this to work!")
 
         message_content = (
             " ".join(message.content.split(" ")[1:])
