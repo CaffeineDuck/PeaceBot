@@ -39,7 +39,7 @@ class UserModel(Model):
 
 
 class AutoResponseModel(Model):
-    id = fields.IntField(pk=True)
+    id = fields.UUIDField(pk=True)
     trigger = fields.TextField(description="Trigger for the autoresponse")
     response = fields.TextField(
         default=None,
@@ -57,6 +57,7 @@ class AutoResponseModel(Model):
         default=False, description="If the autoresponse output has variables"
     )
     guild = fields.ForeignKeyField("main.GuildModel", related_name="Autoresponses")
+    created_by = fields.ForeignKeyField('main.UserModel', related_name='Autoresponses', null=True)
 
     class Meta:
         table = "autoresponses"
