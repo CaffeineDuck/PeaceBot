@@ -39,7 +39,6 @@ class RedditPostCacher:
                 {
                     "url": post.url,
                     "title": post.title,
-                    "author": post.author.name,
                     "permalink": post.permalink,
                 }
                 async for post in subreddit.hot(limit=50)
@@ -113,6 +112,6 @@ class RedditPostCacher:
         discord.Member
         embed.set_image(url=submission.get("url"))
         embed.set_footer(
-            text=f"From: {submission.get('author')} • Requested: {ctx.author.name}"
+            text=f"Requested: {ctx.author.name}"
         )
         await ctx.send(embed=embed)
