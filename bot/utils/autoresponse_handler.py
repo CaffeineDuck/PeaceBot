@@ -38,13 +38,11 @@ class AutoResponseHandler:
     def discord_message(self, new_message: discord.Message):
         self._message = new_message
 
-    @property
     async def autoresponses(self):
         return await self.guild_autoresponses(self._guild_id)
 
-    @property
     async def filtered_autoresponses(self):
-        return await self.guild_filtered_autoresponses(await self.autoresponses)
+        return await self.guild_filtered_autoresponses(await self.autoresponses())
 
     async def message_is_valid(self):
         message = self._message
@@ -62,17 +60,18 @@ class AutoResponseHandler:
         self, guild_autoresponses: List[AutoResponseModel]
     ):
         try:
-            # Gets the first autoresponse object if the sent message is an autoresponse trigge
-            filtered_autoresponse = (
+            # Gets the first autoresponse object if the sent message is an autoresponse trigger
+            filtered_autoresponses = (
                 [
                     autoresponse
                     for autoresponse in guild_autoresponses
-                    if autoresponse.trigger
-                    == self._message.content.split(" ")[0].lower()
-                    and autoresponse.enabled
+                    if autoresponse.enabled
+                    and autoresponse.trigger.lower() in self._message.content.lower()
                 ]
-            )[0]
-            return filtered_autoresponse
+            )
+            # Sorts the autoresponses according to the length of trigger
+            filtered_autoresponses.sort(key=lambda x: x.trigger, reverse=True)
+            return filtered_autoresponses[0]
         except IndexError or TypeError as error:
             return
 
@@ -139,13 +138,18 @@ class AutoResponseHandler:
         return updated_message
 
     async def _extra_arguements_handler(self, autoresponse_model: AutoResponseModel):
+        len_of_trigger = len(autoresponse_model.trigger.split())
         if autoresponse_model.has_variables:
             output = await self._autoresponse_message_formatter(
                 self._message, autoresponse_model.response
             )
         elif autoresponse_model.trigger == self._message.content:
             output = autoresponse_model.response
-        elif autoresponse_model.extra_arguements and self._message.content.split(' ')[0] == autoresponse_model.trigger:
+        elif (
+            autoresponse_model.extra_arguements
+            and self._message.content.split()[:len_of_trigger]
+            == autoresponse_model.trigger.split()
+        ):
             output = autoresponse_model.response
         else:
             output = None
@@ -158,11 +162,7 @@ class AutoResponseHandler:
             if not await self.message_is_valid():
                 return
 
-            filtered_autoresponses = await self.filtered_autoresponses
-
-            if not filtered_autoresponses:
-                await self.update_autoresponse_cache(self._guild_id)
-                filtered_autoresponses = await self.filtered_autoresponses
+            filtered_autoresponses = await self.filtered_autoresponses()
 
             if not filtered_autoresponses:
                 return
