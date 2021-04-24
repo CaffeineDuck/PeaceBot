@@ -40,7 +40,7 @@ class Utils(commands.Cog):
         embed.set_image(url=member.avatar_url)
         embed.set_footer(text=f"Requested by {ctx.author}")
 
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @commands.command(aliases=["user", "info"])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -86,7 +86,7 @@ class Utils(commands.Cog):
         )
         embed.set_thumbnail(url=user.avatar_url)
         embed.set_footer(text=f"ID: {user.id}")
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     """
     Source of the following code:
@@ -139,11 +139,11 @@ class Utils(commands.Cog):
                         )
                     )
                 except StopIteration:
-                    return await ctx.send(
+                    return await ctx.reply(
                         "No pre existing webhook found with given name"
                     )
             else:
-                return await ctx.send("No valid webhook identifiers provided")
+                return await ctx.reply("No valid webhook identifiers provided")
             await wh.send(
                 message,
                 embed=embed,
@@ -157,7 +157,7 @@ class Utils(commands.Cog):
 
         if (edit := await maybe_await(kwargs.pop("edit"))) :
             if edit.author != ctx.guild.me:
-                return await ctx.send(
+                return await ctx.reply(
                     f"The target message wasn't sent by me! It was sent by {edit.author}"
                 )
             await edit.edit(
@@ -172,11 +172,11 @@ class Utils(commands.Cog):
     async def rawembed(self, ctx: commands.Context):
         ref = ctx.message.reference
         if not ref or not ref.message_id:
-            return await ctx.send("Reply to an message with an embed")
+            return await ctx.reply("Reply to an message with an embed")
         message = ref.cached_message or await ctx.channel.fetch_message(ref.message_id)
 
         if not message.embeds:
-            return await ctx.send("Message had no embeds")
+            return await ctx.reply("Message had no embeds")
         em = message.embeds[0]
         description = "```" + str(em.to_dict()) + "```"
         embed = Embed(description=description)

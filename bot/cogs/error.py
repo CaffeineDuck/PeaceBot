@@ -16,11 +16,11 @@ class ErrorHandler(commands.Cog):
         if isinstance(error, commands.CommandNotFound):
             return
         elif isinstance(error, commands.BotMissingPermissions):
-            await ctx.send(
+            await ctx.reply(
                 f"I am missing the following permissions:\n **{','.join(error.missing_perms)}**"
             )
         elif isinstance(error, commands.MissingPermissions):
-            await ctx.send(
+            await ctx.reply(
                 f"You are missing the following permissions:\n**{','.join(error.missing_perms)}**"
             )
         elif isinstance(error, commands.NSFWChannelRequired):
@@ -31,12 +31,12 @@ class ErrorHandler(commands.Cog):
                 color=discord.Color.dark_blue(),
             )
             embed.set_image(url=image)
-            await ctx.send(embed=embed)
+            await ctx.reply(embed=embed)
         else:
             title = " ".join(
                 re.compile(r"[A-Z][a-z]*").findall(error.__class__.__name__)
             )
-            await ctx.send(
+            await ctx.reply(
                 embed=Embed(title=title, description=str(error), color=Color.red())
             )
             raise error

@@ -53,7 +53,7 @@ class Snipe(commands.Cog):
                     name=sniped_message.author.display_name,
                     icon_url=sniped_message.author.avatar_url,
                 )
-                await ctx.send(embed=result)
+                await ctx.reply(embed=result)
 
     @snipe_group.command(name="edit")
     async def snipe_edit(self, ctx):
@@ -69,7 +69,7 @@ class Snipe(commands.Cog):
             result.set_author(
                 name=after.author.display_name, icon_url=after.author.avatar_url
             )
-            await ctx.send(embed=result)
+            await ctx.reply(embed=result)
 
 
 def setup(bot, *args, **kwargs):

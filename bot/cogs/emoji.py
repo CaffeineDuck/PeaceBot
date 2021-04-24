@@ -94,7 +94,7 @@ class Emoji(commands.Cog):
                 description=f"No emoji were found in the {error_message}",
                 color=Color.red(),
             )
-        await ctx.send(embed=summary)
+        await ctx.reply(embed=summary)
 
 
 def setup(bot: PeaceBot):

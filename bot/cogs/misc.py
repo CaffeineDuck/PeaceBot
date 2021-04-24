@@ -66,7 +66,7 @@ class Misc(commands.Cog):
 
         embed = Embed(title=title, color=Color(random.randint(0, 0xFFFFFF)))
         embed.set_image(url=url)
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @commands.command(name="akinator", aliases=["aki"])
     @commands.max_concurrency(1, per=commands.BucketType.user)
@@ -116,7 +116,7 @@ class Misc(commands.Cog):
                     \n[back (**b**)]\
                     \n[stop (**s**)]",
             )
-            await ctx.send(embed=embed)
+            await ctx.reply(embed=embed)
 
             try:
                 answer_message = await self.bot.wait_for(
@@ -125,7 +125,7 @@ class Misc(commands.Cog):
             except asyncio.TimeoutError:
                 raise AkiError("You didn't respond in time!")
             if answer_message.content.lower() in AKINATOR_RESPONSES.get("stop"):
-                await ctx.send("Aki stopped!")
+                await ctx.reply("Aki stopped!")
                 return
             if answer_message.content.lower() in AKINATOR_RESPONSES.get("back"):
                 question = await akinator.back()
@@ -144,7 +144,7 @@ class Misc(commands.Cog):
         embed.add_field(name="From", value=akinator.first_guess["description"])
         embed.set_footer(text="Was I Correct? | y/yes/n/no")
 
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
         def confirmation_check(message: Message):
             return message.channel == ctx.channel and message.author == ctx.author
@@ -156,11 +156,11 @@ class Misc(commands.Cog):
             response = confirmation_message.content.lower()
 
             if response in AKINATOR_RESPONSES.get("yes"):
-                await ctx.send("I Guessed correct, Once Again")
+                await ctx.reply("I Guessed correct, Once Again")
             elif response in AKINATOR_RESPONSES.get("no"):
-                await ctx.send("I have been defeated. You Win.")
+                await ctx.reply("I have been defeated. You Win.")
             else:
-                await ctx.send(
+                await ctx.reply(
                     "I don't know what that means but I'll take it as a win "
                 )
         except TimeoutError:
@@ -199,7 +199,7 @@ class Misc(commands.Cog):
             else:
                 emojified += letter
 
-        await ctx.send(emojified)
+        await ctx.reply(emojified)
 
 
 def setup(bot):

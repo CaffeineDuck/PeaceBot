@@ -28,7 +28,7 @@ class PersonalGuild(commands.Cog):
     async def gn(self, ctx: commands.Context, user: discord.Member = None):
         """Goodnight Command"""
         user = user or ctx.author
-        await ctx.send(f"Get Naked {user.mention}")
+        await ctx.reply(f"Get Naked {user.mention}")
 
     @commands.command(aliases=["s", "say"])
     @commands.check(is_personal_guild)
@@ -36,7 +36,7 @@ class PersonalGuild(commands.Cog):
         try:
             await member.send(f"{ctx.author.mention} said: {message}")
         except Exception:
-            await ctx.send(f"{member.mention} has his/her DMs closed. :(")
+            await ctx.reply(f"{member.mention} has his/her DMs closed. :(")
 
 
 def setup(bot: commands.Bot):

@@ -64,7 +64,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
             # take first item from a playlist
             data = data["entries"][0]
 
-        await ctx.send(
+        await ctx.reply(
             f'```ini\n[Added {data["title"]} to the Queue.]\n```', delete_after=15
         )
 
@@ -212,13 +212,13 @@ class Music(commands.Cog):
         """A local error handler for all errors arising from commands in this cog."""
         if isinstance(error, commands.NoPrivateMessage):
             try:
-                return await ctx.send(
+                return await ctx.reply(
                     "This command can not be used in Private Messages."
                 )
             except discord.HTTPException:
                 pass
         elif isinstance(error, InvalidVoiceChannel):
-            await ctx.send(
+            await ctx.reply(
                 "Error connecting to Voice Channel. "
                 "Please make sure you are in a valid channel or provide me with one"
             )
@@ -266,7 +266,7 @@ class Music(commands.Cog):
                     f"Connecting to channel: <{channel}> timed out."
                 )
 
-        await ctx.send(f"Connected to: **{channel}**", delete_after=20)
+        await ctx.reply(f"Connected to: **{channel}**", delete_after=20)
 
     @commands.command(name="play", aliases=["sing"])
     async def play_(self, ctx, *, search: str):
@@ -294,14 +294,14 @@ class Music(commands.Cog):
         vc = ctx.voice_client
 
         if not vc or not vc.is_playing():
-            return await ctx.send(
+            return await ctx.reply(
                 "I am not currently playing anything!", delete_after=20
             )
         elif vc.is_paused():
             return
 
         vc.pause()
-        await ctx.send(f"**`{ctx.author}`**: Paused the song!")
+        await ctx.reply(f"**`{ctx.author}`**: Paused the song!")
 
     @commands.command(name="resume")
     async def resume_(self, ctx):
@@ -309,14 +309,14 @@ class Music(commands.Cog):
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
-            return await ctx.send(
+            return await ctx.reply(
                 "I am not currently playing anything!", delete_after=20
             )
         elif not vc.is_paused():
             return
 
         vc.resume()
-        await ctx.send(f"**`{ctx.author}`**: Resumed the song!")
+        await ctx.reply(f"**`{ctx.author}`**: Resumed the song!")
 
     @commands.command(name="skip")
     async def skip_(self, ctx):
@@ -324,7 +324,7 @@ class Music(commands.Cog):
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
-            return await ctx.send(
+            return await ctx.reply(
                 "I am not currently playing anything!", delete_after=20
             )
 
@@ -334,7 +334,7 @@ class Music(commands.Cog):
             return
 
         vc.stop()
-        await ctx.send(f"**`{ctx.author}`**: Skipped the song!")
+        await ctx.reply(f"**`{ctx.author}`**: Skipped the song!")
 
     @commands.command(name="queue", aliases=["q", "playlist"])
     async def queue_info(self, ctx):
@@ -342,13 +342,13 @@ class Music(commands.Cog):
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
-            return await ctx.send(
+            return await ctx.reply(
                 "I am not currently connected to voice!", delete_after=20
             )
 
         player = self.get_player(ctx)
         if player.queue.empty():
-            return await ctx.send("There are currently no more queued songs.")
+            return await ctx.reply("There are currently no more queued songs.")
 
         # Grab up to 5 entries from the queue...
         upcoming = list(itertools.islice(player.queue._queue, 0, 5))
@@ -356,7 +356,7 @@ class Music(commands.Cog):
         fmt = "\n".join(f'**`{_["title"]}`**' for _ in upcoming)
         embed = discord.Embed(title=f"Upcoming - Next {len(upcoming)}", description=fmt)
 
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @commands.command(
         name="now_playing", aliases=["np", "current", "currentsong", "playing"]
@@ -366,13 +366,13 @@ class Music(commands.Cog):
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
-            return await ctx.send(
+            return await ctx.reply(
                 "I am not currently connected to voice!", delete_after=20
             )
 
         player = self.get_player(ctx)
         if not player.current:
-            return await ctx.send("I am not currently playing anything!")
+            return await ctx.reply("I am not currently playing anything!")
 
         try:
             # Remove our previous now_playing message.
@@ -380,7 +380,7 @@ class Music(commands.Cog):
         except discord.HTTPException:
             pass
 
-        player.np = await ctx.send(
+        player.np = await ctx.reply(
             f"**Now Playing:** `{vc.source.title}` "
             f"requested by `{vc.source.requester}`"
         )
@@ -391,12 +391,12 @@ class Music(commands.Cog):
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
-            return await ctx.send(
+            return await ctx.reply(
                 "I am not currently connected to voice!", delete_after=20
             )
 
         if not 0 < vol < 101:
-            return await ctx.send("Please enter a value between 1 and 100.")
+            return await ctx.reply("Please enter a value between 1 and 100.")
 
         player = self.get_player(ctx)
 
@@ -404,7 +404,7 @@ class Music(commands.Cog):
             vc.source.volume = vol / 100
 
         player.volume = vol / 100
-        await ctx.send(f"**`{ctx.author}`**: Set the volume to **{vol}%**")
+        await ctx.reply(f"**`{ctx.author}`**: Set the volume to **{vol}%**")
 
     @commands.command(name="stop")
     async def stop_(self, ctx):
@@ -415,7 +415,7 @@ class Music(commands.Cog):
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
-            return await ctx.send(
+            return await ctx.reply(
                 "I am not currently playing anything!", delete_after=20
             )
 

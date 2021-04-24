@@ -43,7 +43,7 @@ class Moderation(commands.Cog):
 
         embed = discord.Embed(description="Has been muted!", color=discord.Color.gold())
         embed.set_author(name=user, url=user.avatar_url, icon_url=user.avatar_url)
-        await ctx.send(embed=embed, delete_after=5)
+        await ctx.reply(embed=embed, delete_after=5)
 
     @command()
     @guild_only()
@@ -61,7 +61,7 @@ class Moderation(commands.Cog):
             else "Hasn't been muted yet!"
         )
         embed.set_author(name=user, url=user.avatar_url, icon_url=user.avatar_url)
-        await ctx.send(embed=embed, delete_after=5)
+        await ctx.reply(embed=embed, delete_after=5)
 
         # TODO: Use a try/ except statement here!
         await user.remove_roles(role)
@@ -87,7 +87,7 @@ class Moderation(commands.Cog):
             icon_url=user.avatar_url,
         )
         embed.set_footer(text=f"Requested by {ctx.author}")
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
         await user.send(f"You have been kicked. Reason {reason}")
 
     @command(name="purge")
@@ -102,7 +102,7 @@ class Moderation(commands.Cog):
         channel = ctx.message.channel
         await ctx.message.delete()
         deleted_messages = len(await channel.purge(limit=num_messages))
-        await ctx.send(
+        await ctx.reply(
             f"`{deleted_messages} messages has been deleted!`", delete_after=5
         )
 
@@ -124,7 +124,7 @@ class Moderation(commands.Cog):
         }
         await channel.edit(overwrites=overwrites)
         try:
-            await ctx.send(
+            await ctx.reply(
                 f"**The channel {channel.mention} has successfully been locked!**"
             )
         except discord.Forbidden:
@@ -149,7 +149,7 @@ class Moderation(commands.Cog):
             ctx.guild.default_role: discord.PermissionOverwrite(send_messages=True)
         }
         await channel.edit(overwrites=overwrites)
-        await ctx.send(
+        await ctx.reply(
             f"**The channel {channel.mention} has successfully been unlocked!**"
         )
 

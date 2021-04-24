@@ -42,7 +42,7 @@ class Fun(commands.Cog):
             comma_separated = ", ".join(map(lambda m: m.mention, target[:-1]))
             final_element = f", and {target[-1].mention}"
             formatted_targets = f"{comma_separated}{final_element}"
-        await ctx.send(
+        await ctx.reply(
             f"{ctx.author.display_name} throws a poptart at {formatted_targets} with a mind numbing speed of "
             f"{int(percentage_of_speed)} m/s, that's {rand_percentage * 100:.2f}% the speed of light!"
         )
@@ -58,7 +58,7 @@ class Fun(commands.Cog):
         )
         random_link = random.choice(self.hugs)
         embed.set_image(url=random_link)
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @commands.command()
     @commands.guild_only()
@@ -71,7 +71,7 @@ class Fun(commands.Cog):
         )
         random_link = random.choice(self.pats)
         embed.set_image(url=random_link)
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @commands.command()
     @commands.guild_only()
@@ -84,7 +84,7 @@ class Fun(commands.Cog):
         )
         random_link = random.choice(self.kills)
         embed.set_image(url=random_link)
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @commands.command()
     @commands.guild_only()
@@ -97,7 +97,7 @@ class Fun(commands.Cog):
         )
         random_link = random.choice(self.slaps)
         embed.set_image(url=random_link)
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @commands.command()
     @commands.guild_only()
@@ -110,7 +110,7 @@ class Fun(commands.Cog):
         )
         random_link = random.choice(self.licks)
         embed.set_image(url=random_link)
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
 
 def setup(bot):

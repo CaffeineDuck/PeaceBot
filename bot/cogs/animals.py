@@ -19,7 +19,7 @@ class Animals(commands.Cog):
         embed = discord.Embed(title="Henlo")
         embed.set_image(url=image)
         embed.set_footer(text="https://dog.ceo/")
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -31,7 +31,7 @@ class Animals(commands.Cog):
         embed = discord.Embed(title="What does the fox say?")
         embed.set_image(url=image)
         embed.set_footer(text="https://randomfox.ca")
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
 
 def setup(bot: PeaceBot):

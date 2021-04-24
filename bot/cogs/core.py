@@ -23,7 +23,7 @@ class Core(commands.Cog):
     async def ping(self, ctx: commands.Context):
         """Check latency of the bot"""
         latency = str(round(self.bot.latency * 1000, 1))
-        await ctx.send(
+        await ctx.reply(
             embed=Embed(title="Pong!", description=f"{latency}ms", color=Color.blue())
         )
 
@@ -49,7 +49,7 @@ class Core(commands.Cog):
 
         embed.set_thumbnail(url=str(ctx.guild.me.avatar_url))
 
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @commands.command(aliases=["re"])
     async def redo(self, ctx: commands.Context):
@@ -79,12 +79,12 @@ class Core(commands.Cog):
             color=Color.blue(),
             description=f"{ctx.author.mention}, My current prefix is `{prefix}` or {self.bot.user.mention}",
         )
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @commands.command()
     async def invite(self, ctx: commands.Context):
         """Get the invite link of this bot from this command!"""
-        await ctx.send(
+        await ctx.reply(
             f"https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=8&scope=bot"
         )
 

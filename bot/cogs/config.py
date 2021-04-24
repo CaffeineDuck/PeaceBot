@@ -28,7 +28,7 @@ class Config(commands.Cog):
                 color=discord.Color.blue(),
                 description=f"{ctx.author.mention}, You can't use that.",
             )
-            await ctx.send(embed=embed)
+            await ctx.reply(embed=embed)
         else:
             guild = await GuildModel.from_context(ctx)
             if prefix == guild.prefix:
@@ -36,7 +36,7 @@ class Config(commands.Cog):
                     color=discord.Color.blue(),
                     description=f"My prefix for {ctx.guild.name} is already `{prefix}`",
                 )
-                await ctx.send(embed=embed)
+                await ctx.reply(embed=embed)
                 return
             if guild is not None:
                 guild.prefix = prefix
@@ -47,7 +47,7 @@ class Config(commands.Cog):
                 color=discord.Color.blue(),
                 description=f"I set your guild's prefix to `{guild.prefix}`",
             )
-            await ctx.send(embed=embed)
+            await ctx.reply(embed=embed)
 
 
 def setup(bot: PeaceBot):
