@@ -20,9 +20,10 @@ class Reddit(commands.Cog):
     async def aww(self, ctx: commands.Context):
         await self.cache.reddit_sender(ctx, "aww")
 
-    @commands.command(aliases=['cursedcomments'])
+    @commands.command(aliases=["cursedcomments"])
     async def cursed(self, ctx: commands.Context):
         await self.cache.reddit_sender(ctx, "cursedcomments")
+
 
 def setup(bot: PeaceBot):
     bot.add_cog(Reddit(bot))

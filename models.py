@@ -54,8 +54,7 @@ class AutoResponseModel(Model):
         description="If the autoresponse should be run even when extra arguements are passed",
     )
     has_variables = fields.BooleanField(
-        default=False,
-        description="If the autoresponse output has variables"
+        default=False, description="If the autoresponse output has variables"
     )
     guild = fields.ForeignKeyField("main.GuildModel", related_name="Autoresponses")
 

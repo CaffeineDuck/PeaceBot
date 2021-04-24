@@ -77,8 +77,7 @@ class AutoResponses(commands.Cog):
         ]
 
         if not record:
-            raise AutoResponseError(
-                "This autoresponse doesnot exist in this guild!")
+            raise AutoResponseError("This autoresponse doesnot exist in this guild!")
 
         # Getting the first value from the record as record is a list
         record = record[0]
@@ -116,10 +115,12 @@ class AutoResponses(commands.Cog):
                 out_type=bool,
                 reaction_interface=True,
             ),
-            Prompt('Has Variables',
-                   description='Does the response of the autoresponse have any variables?',
-                   out_type=bool,
-                   reaction_interface=True)
+            Prompt(
+                "Has Variables",
+                description="Does the response of the autoresponse have any variables?",
+                out_type=bool,
+                reaction_interface=True,
+            ),
         ]
 
         wizard = Wizard(
@@ -131,7 +132,9 @@ class AutoResponses(commands.Cog):
             confirm_prompt=True,
         )
 
-        trigger, response, extra_arguements, has_variables = await wizard.run(ctx.channel)
+        trigger, response, extra_arguements, has_variables = await wizard.run(
+            ctx.channel
+        )
 
         record, _ = await AutoResponseModel.get_or_create(
             guild=guild, trigger=trigger.lower()
@@ -141,7 +144,9 @@ class AutoResponses(commands.Cog):
         record.extra_arguements = extra_arguements
         record.has_variables = has_variables
 
-        await record.save(update_fields=["enabled", "response", "extra_arguements", "has_variables"])
+        await record.save(
+            update_fields=["enabled", "response", "extra_arguements", "has_variables"]
+        )
 
     @autoresponse.command(name="delete_all", aliases=["dall", "remall"])
     @commands.cooldown(1, 500, BucketType.user)
@@ -165,8 +170,7 @@ class AutoResponses(commands.Cog):
         ]
 
         if not autoresponse:
-            raise AutoResponseError(
-                "This autoresponse doesnot exist in this guild!")
+            raise AutoResponseError("This autoresponse doesnot exist in this guild!")
 
         prompts = [
             Prompt(
@@ -208,8 +212,7 @@ class AutoResponses(commands.Cog):
         disabled_autoresponses = ", ".join(disabled_autoresponses)
 
         # Sends the embed with all the enabled autoresponses for that server!
-        embed = discord.Embed(title="Autorespones",
-                              colour=discord.Color.gold())
+        embed = discord.Embed(title="Autorespones", colour=discord.Color.gold())
 
         embed.add_field(
             name="Enabled Autoresponses",

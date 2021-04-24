@@ -56,7 +56,7 @@ class PeaceBot(commands.Bot):
                     "bot.cogs.misc",
                     "bot.cogs.utils",
                     "bot.cogs.reddit",
-                    "bot.cogs.animals"
+                    "bot.cogs.animals",
                 )
             )
         if loadjsk:
