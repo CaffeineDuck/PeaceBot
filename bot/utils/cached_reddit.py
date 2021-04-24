@@ -111,7 +111,5 @@ class RedditPostCacher:
         )
         discord.Member
         embed.set_image(url=submission.get("url"))
-        embed.set_footer(
-            text=f"Requested: {ctx.author.name}"
-        )
+        embed.set_footer(text=f"Requested: {ctx.author.name}")
         await ctx.send(embed=embed)

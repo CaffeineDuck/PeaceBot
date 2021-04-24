@@ -1,7 +1,9 @@
+import pickle
 import re
 import uuid
 from typing import List, Optional, Union
 
+import aiofiles
 import discord
 from cachetools import TTLCache
 from discord import Color, Embed
@@ -317,6 +319,43 @@ class AutoResponses(commands.Cog):
         discord_guild = self.bot.get_guild(guild_id)
         await ctx.send(
             f"All the autoresponses from server **{discord_guild.name}** have been imported!"
+        )
+
+    @autoresponse.command(name="exportinfile")
+    async def autoresponse_export_in_file(self, ctx: commands.Context):
+        autoresponses = ctx.autoresponses
+        file_path = f"cache/{ctx.guild.id}_autoresponses.pickle"
+
+        async with aiofiles.open(file_path, mode="wb+") as f:
+            await f.write(pickle.dumps(autoresponses))
+
+        await ctx.send(
+            file=discord.File(file_path, f"{ctx.guild.name}_autoresponses.pickle")
+        )
+
+    @autoresponse.command(name="importfromfile")
+    async def autoresponse_import_from_file(self, ctx: commands.Context):
+        await ctx.trigger_typing()
+        if not ctx.message.attachments:
+            return
+
+        attachment = ctx.message.attachments[0]
+        main_data = pickle.loads(await attachment.read())
+
+        triggers = [autoresponse.trigger for autoresponse in ctx.autoresponses]
+        autoresponses = filter(lambda x: x.trigger not in triggers, main_data)
+
+        if not autoresponses:
+            raise AutoResponseError("Every autoresponse here already exists!")
+
+        guild = await GuildModel.from_context(ctx)
+        user, _ = await UserModel.get_or_create(id=ctx.author.id)
+
+        for autoresponse in autoresponses:
+            await self.clone_autoresponse(autoresponse, guild, user)
+
+        await ctx.reply(
+            "All the autoresponses have been imported from the provided file!"
         )
 
     @autoresponse.command(name="list", aliases=["show", "showall", "all"])
