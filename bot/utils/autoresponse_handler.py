@@ -59,13 +59,15 @@ class AutoResponseHandler:
     async def guild_filtered_autoresponses(
         self, guild_autoresponses: List[AutoResponseModel]
     ):
+        check = lambda m, l: self._message.content.split()[:l] == m.trigger.split()
+
         try:
             # Gets the first autoresponse object if the sent message is an autoresponse trigger
             filtered_autoresponses = [
                 autoresponse
                 for autoresponse in guild_autoresponses
                 if autoresponse.enabled
-                and autoresponse.trigger.lower() in self._message.content.lower()
+                and check(autoresponse, len(autoresponse.trigger.split()))
             ]
             # Sorts the autoresponses according to the length of trigger
             filtered_autoresponses.sort(key=lambda x: x.trigger, reverse=True)

@@ -1,5 +1,5 @@
-import pickle
 import os
+import pickle
 import re
 import uuid
 from typing import List, Optional, Union
@@ -81,8 +81,7 @@ class AutoResponses(commands.Cog):
         ]
 
         if not record:
-            raise AutoResponseError(
-                "This autoresponse doesnot exist in this guild!")
+            raise AutoResponseError("This autoresponse doesnot exist in this guild!")
 
         # Getting the first value from the record as record is a list
         record = record[0]
@@ -195,8 +194,7 @@ class AutoResponses(commands.Cog):
         ]
 
         if not autoresponse:
-            raise AutoResponseError(
-                "This autoresponse doesnot exist in this guild!")
+            raise AutoResponseError("This autoresponse doesnot exist in this guild!")
 
         prompts = [
             Prompt(
@@ -230,8 +228,7 @@ class AutoResponses(commands.Cog):
                 if autoresponse.trigger == trigger
             ][0]
         except IndexError:
-            raise AutoResponseError(
-                "This autoresponse doesnot exist in this guild!")
+            raise AutoResponseError("This autoresponse doesnot exist in this guild!")
 
         return autoresponse
 
@@ -247,10 +244,8 @@ class AutoResponses(commands.Cog):
             color=discord.Color.gold(),
         )
         embed.add_field(name="ID:", value=autoresponse.id, inline=False)
-        embed.add_field(name="Trigger:",
-                        value=autoresponse.trigger, inline=False)
-        embed.add_field(name="Response:",
-                        value=autoresponse.response, inline=False)
+        embed.add_field(name="Trigger:", value=autoresponse.trigger, inline=False)
+        embed.add_field(name="Response:", value=autoresponse.response, inline=False)
         embed.add_field(
             name="Accepts Extra Arguements:",
             value=autoresponse.extra_arguements,
@@ -259,8 +254,7 @@ class AutoResponses(commands.Cog):
         embed.add_field(
             name="Has Variables:", value=autoresponse.has_variables, inline=False
         )
-        embed.add_field(name="Created By:",
-                        value=f"<@{created_by.id}>", inline=False)
+        embed.add_field(name="Created By:", value=f"<@{created_by.id}>", inline=False)
 
         await ctx.reply(embed=embed)
 
@@ -305,7 +299,7 @@ class AutoResponses(commands.Cog):
 
         new_model = await self.clone_autoresponse(autoresponse, guild, user)
         ctx.autoresponses.append(new_model)
-        
+
         await ctx.invoke(self.autoresponse_info, trigger=autoresponse.trigger)
 
     @autoresponse.command(name="exportall")
@@ -322,6 +316,8 @@ class AutoResponses(commands.Cog):
             await self.clone_autoresponse(pv_ar, guild, user)
 
         discord_guild = self.bot.get_guild(guild_id)
+        if not discord_guild:
+            raise AutoResponseError("AutoResponses Not Found!")
         await ctx.reply(
             f"All the autoresponses from server **{discord_guild.name}** have been imported!"
         )
@@ -335,14 +331,13 @@ class AutoResponses(commands.Cog):
             await f.write(pickle.dumps(autoresponses))
 
         await ctx.reply(
-            file=discord.File(
-                file_path, f"{ctx.guild.name}_autoresponses.pickle")
+            file=discord.File(file_path, f"{ctx.guild.name}_autoresponses.pickle")
         )
         os.remove(file_path)
 
     @autoresponse.command(name="importfromfile")
     async def autoresponse_import_from_file(self, ctx: commands.Context):
-        await ctx.trigg
+        await ctx.trigger_typing()
         if not ctx.message.attachments:
             return
 
@@ -385,8 +380,7 @@ class AutoResponses(commands.Cog):
         disabled_autoresponses = ", ".join(disabled_autoresponses)
 
         # Sends the embed with all the enabled autoresponses for that server!
-        embed = discord.Embed(title="Autorespones",
-                              colour=discord.Color.gold())
+        embed = discord.Embed(title="Autorespones", colour=discord.Color.gold())
 
         embed.add_field(
             name="Enabled Autoresponses",
