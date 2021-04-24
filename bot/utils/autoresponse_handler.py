@@ -135,7 +135,13 @@ class AutoResponseHandler:
 
     async def _extra_arguements_handler(self, autoresponse_model: AutoResponseModel):
         len_of_trigger = len(autoresponse_model.trigger.split())
-        if autoresponse_model.has_variables:
+
+        check = (
+            lambda m: self._message.content.split()[:len_of_trigger]
+            == m.trigger.split()
+        )
+
+        if autoresponse_model.has_variables and check(autoresponse_model):
             output = await self._autoresponse_message_formatter(
                 self._message, autoresponse_model.response
             )
