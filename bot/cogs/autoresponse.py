@@ -1,4 +1,5 @@
 import pickle
+import os
 import re
 import uuid
 from typing import List, Optional, Union
@@ -89,7 +90,7 @@ class AutoResponses(commands.Cog):
 
         toggle_str = "enabled" if toggle else "disabled"
 
-        await ctx.send(f"The autoresponse `{trigger}` has been {toggle_str}")
+        await ctx.reply(f"The autoresponse `{trigger}` has been {toggle_str}")
 
     @commands.cooldown(1, 60, BucketType.user)
     @autoresponse.command(name="add", aliases=["addresponses", "addautoresponses"])
@@ -178,7 +179,7 @@ class AutoResponses(commands.Cog):
         if response:
             await AutoResponseModel.filter(guild=guild).delete()
         else:
-            await ctx.send("Aborted!")
+            await ctx.reply("Aborted!")
 
     @autoresponse.command(name="delete", aliases=["delresponse", "del"])
     @commands.cooldown(1, 10, BucketType.user)
@@ -255,12 +256,12 @@ class AutoResponses(commands.Cog):
         )
         embed.add_field(name="Created By:", value=f"<@{created_by.id}>", inline=False)
 
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @autoresponse.command(name="export")
     async def autoresponse_export(self, ctx: commands.Context, trigger: str):
         autoresponse = await self.get_autoresponse(ctx, trigger)
-        await ctx.send(f"```{autoresponse.id}```")
+        await ctx.reply(f"```{autoresponse.id}```")
 
     async def clone_autoresponse(
         self, previous_model: AutoResponseModel, guild: GuildModel, user: UserModel
@@ -305,7 +306,7 @@ class AutoResponses(commands.Cog):
 
     @autoresponse.command(name="exportall")
     async def autoresponse_guild_export_all(self, ctx: commands.Context):
-        await ctx.send(f"```{ctx.guild.id}```")
+        await ctx.reply(f"```{ctx.guild.id}```")
 
     @autoresponse.command(name="importall")
     async def autoresponse_guild_import_all(self, ctx: commands.Context, guild_id: int):
@@ -317,7 +318,7 @@ class AutoResponses(commands.Cog):
             await self.clone_autoresponse(pv_ar, guild, user)
 
         discord_guild = self.bot.get_guild(guild_id)
-        await ctx.send(
+        await ctx.reply(
             f"All the autoresponses from server **{discord_guild.name}** have been imported!"
         )
 
@@ -329,13 +330,14 @@ class AutoResponses(commands.Cog):
         async with aiofiles.open(file_path, mode="wb+") as f:
             await f.write(pickle.dumps(autoresponses))
 
-        await ctx.send(
+        await ctx.reply(
             file=discord.File(file_path, f"{ctx.guild.name}_autoresponses.pickle")
         )
+        os.remove(file_path)
 
     @autoresponse.command(name="importfromfile")
     async def autoresponse_import_from_file(self, ctx: commands.Context):
-        await ctx.trigger_typing()
+        await ctx.trigg
         if not ctx.message.attachments:
             return
 
@@ -395,7 +397,7 @@ class AutoResponses(commands.Cog):
             )
         embed.set_footer(text=f"Requested by {ctx.author}")
 
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
 
 def setup(bot: PeaceBot):
