@@ -141,11 +141,15 @@ class AutoResponses(commands.Cog):
             guild=guild, trigger=trigger.lower()
         )
 
+        user, _ = await UserModel.get_or_create(
+            id=ctx.guild.id
+        )
+
         record.enabled = True
         record.response = response
         record.extra_arguements = extra_arguements
         record.has_variables = has_variables
-        record.created_by_id = ctx.author.id
+        record.created_by = user
 
         await record.save()
 
