@@ -147,6 +147,6 @@ class PeaceBot(commands.Bot):
 
     async def on_ready(self):
         print(f"Logged in as {self.user.name}#{self.user.discriminator}")
-        if self.developement_environment:
-            self.cog_watcher_task.start()
+        # if self.developement_environment:
+        self.cog_watcher_task.start()
         print("Ready")
