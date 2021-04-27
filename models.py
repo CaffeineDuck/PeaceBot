@@ -66,3 +66,24 @@ class AutoResponseModel(Model):
     class Meta:
         table = "autoresponses"
         table_description = "Represents the autoresponses for each GuildModel"
+
+
+class CommandModel(Model):
+    id = fields.UUIDField(pk=True)
+    name = fields.TextField(description="Name of the cog or command!")
+    enabled = fields.BooleanField(
+        default=True, description="If the command/cog is enabled/disabled"
+    )
+    is_cog = fields.BooleanField(
+        default=False, description="If the command/cog is a command"
+    )
+    guild = fields.ForeignKeyField("main.GuildModel", related_name="Commands")
+    channel = fields.BigIntField(
+        description="Channel of that disabled/enable command", null=True
+    )
+
+    class Meta:
+        table = "commands"
+        table_description = (
+            "Represets all the enabled and disabled commands for each Guild"
+        )
