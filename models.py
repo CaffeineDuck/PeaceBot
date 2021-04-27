@@ -78,9 +78,7 @@ class CommandModel(Model):
         default=False, description="If the command/cog is a command"
     )
     guild = fields.ForeignKeyField("main.GuildModel", related_name="Commands")
-    channel = fields.BigIntField(
-        description="Channel of that disabled/enable command", null=True
-    )
+    channel = fields.BigIntField(description="Channel of that disabled/enable command")
 
     class Meta:
         table = "commands"
