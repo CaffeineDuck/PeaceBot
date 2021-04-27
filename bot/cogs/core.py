@@ -168,7 +168,9 @@ class Core(commands.Cog):
 
         for text_channel in valid_channels:
             record, _ = await CommandModel.get_or_create(
-                guild=guild, name=full_command.name, channel=text_channel.id
+                guild=guild,
+                name=full_command.qualified_name if is_cog else full_command.name,
+                channel=text_channel.id,
             )
             record.is_cog = is_cog
             record.enabled = toggle

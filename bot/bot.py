@@ -132,14 +132,26 @@ class PeaceBot(commands.Bot):
             commands = await CommandModel.filter(guild__id=ctx.guild.id)
             self.commands_cache[ctx.guild.id] = commands
 
-        check = (
-            lambda ctx, command: command.name == ctx.command.name
-            and not command.enabled
+        defualt_check = (
+            lambda ctx, command: 
+            not command.enabled
             and ctx.channel.id == command.channel
         )
+        command_check = (
+            lambda ctx, command: not command.is_cog
+            and ctx.command.name == command.name
+        )
+        cog_check = (
+            lambda ctx, cog: cog.is_cog
+            and ctx.cog
+            and cog.name == ctx.cog.qualified_name
+        )
 
-        current_command = [command.name for command in commands if check(ctx, command)]
-
+        current_command = [
+            command.name
+            for command in commands
+            if defualt_check(ctx, command) and (command_check(ctx, command) or cog_check(ctx, command))
+        ]
         if current_command:
             raise CommandDisabled
 
