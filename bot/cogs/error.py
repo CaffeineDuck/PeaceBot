@@ -4,6 +4,8 @@ import discord
 from discord import Color, Embed
 from discord.ext import commands
 
+from bot.utils.errors import CommandDisabled
+
 
 class ErrorHandler(commands.Cog):
     def __init__(self, bot):
@@ -13,7 +15,9 @@ class ErrorHandler(commands.Cog):
     async def on_command_error(
         self, ctx: commands.Context, error: commands.CommandError
     ):
-        if isinstance(error, commands.CommandNotFound):
+        if isinstance(error, commands.CommandNotFound) or isinstance(
+            error, CommandDisabled
+        ):
             return
         elif isinstance(error, commands.BotMissingPermissions):
             await ctx.reply(
