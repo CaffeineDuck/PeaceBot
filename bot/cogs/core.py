@@ -96,6 +96,7 @@ class Core(commands.Cog):
         )
 
     @commands.guild_only()
+    @commands.has_permissions(manage_messages=True)
     @commands.command(name="isdisabled")
     async def is_disabled(
         self,
@@ -114,6 +115,7 @@ class Core(commands.Cog):
             await ctx.reply(f"`{command}` is disabled in {channel.mention}")
 
     @commands.guild_only()
+    @commands.has_permissions(manage_guild=True)
     @commands.command()
     async def disable(
         self,
@@ -124,6 +126,7 @@ class Core(commands.Cog):
         await self.command_enable_disable_handler(ctx, command, channel, False)
 
     @commands.guild_only()
+    @commands.has_permissions(manage_guild=True)
     @commands.command()
     async def enable(
         self,
