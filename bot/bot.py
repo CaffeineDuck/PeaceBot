@@ -11,7 +11,9 @@ from discord.ext import commands, tasks
 from tortoise import Tortoise
 
 from bot.help_command import HelpCommand
-from models import GuildModel
+from models import GuildModel, CommandModel
+
+from bot.utils.errors import CommandDisabled
 
 logging.basicConfig(level=logging.INFO)
 
@@ -35,7 +37,9 @@ class PeaceBot(commands.Bot):
         self.developement_environment = developement_environment
         self.connect_db.start()
         self.prefix = prefix
-        self.prefixes_cache = LRUCache(100)
+        self.prefixes_cache = LRUCache(1000)
+        self.commands_cache = LRUCache(1000)
+        self.add_check(self.check)
 
         # Makes the cog-help case insensivite
         # self._botBase__cogs  = commands.core._CaseInsensitiveDict()
@@ -120,6 +124,26 @@ class PeaceBot(commands.Bot):
                 print(f"Loaded {ext}")
             except Exception as e:
                 traceback.print_exception(type(e), e, e.__traceback__)
+
+    async def check(self, ctx: commands.Context):
+        commands = self.commands_cache.get(ctx.guild.id)
+
+        if not commands:
+            commands = await CommandModel.filter(guild__id=ctx.guild.id)
+            self.commands_cache[ctx.guild.id] = commands
+
+        check = (
+            lambda ctx, command: command.name == ctx.command.name
+            and not command.enabled
+            and ctx.channel.id == command.channel
+        )
+
+        current_command = [command.name for command in commands if check(ctx, command)]
+
+        if current_command:
+            raise CommandDisabled
+
+        return True
 
     async def on_ready(self):
         print(f"Logged in as {self.user.name}#{self.user.discriminator}")
