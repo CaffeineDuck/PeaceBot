@@ -1,8 +1,3 @@
-"""
-Source of the following code:
-https://github.com/falsedev/tech-struck
-"""
-
 import functools
 import re
 from typing import Dict, Iterable, TypeVar, Union
@@ -42,7 +37,7 @@ class InvalidColor(commands.CommandError):
         self.value = value
 
     def __str__(self):
-        return f"{self.value} isn't a valid color, eg: `#fff000`, `f0f0f0`"
+        return "%s isn't a valid color, eg: `#fff000`, `f0f0f0`" % self.value
 
 
 class UrlValidator:
@@ -60,7 +55,7 @@ class UrlValidator:
 def colortype(value: str):
     try:
         return int(value.removeprefix("#"), base=16)
-    except ValueError or AttributeError:
+    except ValueError:
         raise InvalidColor(value)
 
 
@@ -218,3 +213,4 @@ def dict_to_allowed_mentions(data):
         roles=data.pop("role_mentions"),
         users=data.pop("user_mentions"),
     )
+    
