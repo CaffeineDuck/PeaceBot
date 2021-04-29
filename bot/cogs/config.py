@@ -21,7 +21,7 @@ class Config(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 10, BucketType.user)
-    @commands.bot_has_permissions(send_messages=True, read_messages=True)
+    @commands.has_permissions(manage_guild=True)
     @commands.guild_only()
     async def changeprefix(self, ctx: commands.Context, prefix: str):
         guild = await GuildModel.from_context(ctx)
