@@ -35,7 +35,6 @@ class Snipe(commands.Cog):
     @commands.cooldown(1, 5, BucketType.user)
     @commands.guild_only()
     @commands.bot_has_permissions(send_messages=True, read_messages=True)
-    @commands.bot_has_guild_permissions(send_messages=True, read_messages=True)
     async def snipe_group(self, ctx):
         """Snipe a deleted message"""
         if ctx.invoked_subcommand is None:
