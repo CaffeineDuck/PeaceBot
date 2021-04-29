@@ -54,7 +54,7 @@ class UrlValidator:
 
 def colortype(value: str):
     try:
-        return int(value.removeprefix("#"), base=16)
+        return int(value.replace('#', ''), base=16)
     except ValueError:
         raise InvalidColor(value)
 
@@ -213,4 +213,3 @@ def dict_to_allowed_mentions(data):
         roles=data.pop("role_mentions"),
         users=data.pop("user_mentions"),
     )
-    
