@@ -26,10 +26,9 @@ class Config(commands.Cog):
     @commands.guild_only()
     async def changeprefix(self, ctx: commands.Context, prefix: str):
         guild = await GuildModel.from_context(ctx)
-        if guild is not None:
-            guild.prefix = prefix
-            await guild.save(update_fields=["prefix"])
-            self.bot.prefixes_cache[ctx.guild.id] = prefix
+        guild.prefix = prefix
+        await guild.save(update_fields=["prefix"])
+        self.bot.prefixes_cache[ctx.guild.id] = prefix
 
         embed = discord.Embed(
             color=discord.Color.blue(),
