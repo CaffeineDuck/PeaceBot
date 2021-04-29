@@ -25,31 +25,17 @@ class Config(commands.Cog):
     @commands.bot_has_guild_permissions(send_messages=True, read_messages=True)
     @commands.guild_only()
     async def changeprefix(self, ctx: commands.Context, prefix: str):
-        if ctx.author is not ctx.guild.owner:
-            embed = discord.Embed(
-                color=discord.Color.blue(),
-                description=f"{ctx.author.mention}, You can't use that.",
-            )
-            await ctx.reply(embed=embed)
-        else:
-            guild = await GuildModel.from_context(ctx)
-            if prefix == guild.prefix:
-                embed = discord.Embed(
-                    color=discord.Color.blue(),
-                    description=f"My prefix for {ctx.guild.name} is already `{prefix}`",
-                )
-                await ctx.reply(embed=embed)
-                return
-            if guild is not None:
-                guild.prefix = prefix
-                await guild.save(update_fields=["prefix"])
-                self.bot.prefixes_cache[ctx.guild.id] = prefix
+        guild = await GuildModel.from_context(ctx)
+        if guild is not None:
+            guild.prefix = prefix
+            await guild.save(update_fields=["prefix"])
+            self.bot.prefixes_cache[ctx.guild.id] = prefix
 
-            embed = discord.Embed(
-                color=discord.Color.blue(),
-                description=f"I set your guild's prefix to `{guild.prefix}`",
-            )
-            await ctx.reply(embed=embed)
+        embed = discord.Embed(
+            color=discord.Color.blue(),
+            description=f"I set your guild's prefix to `{guild.prefix}`",
+        )
+        await ctx.reply(embed=embed)
 
     @commands.guild_only()
     @commands.has_permissions(manage_messages=True)
