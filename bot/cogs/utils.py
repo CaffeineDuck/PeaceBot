@@ -25,6 +25,10 @@ async def maybe_await(coro):
     return await coro
 
 
+class EmbedError(commands.CommandError):
+    pass
+
+
 class Utils(commands.Cog):
     def __init__(self, bot: PeaceBot):
         self.bot = bot
@@ -169,14 +173,18 @@ class Utils(commands.Cog):
         await ctx.message.add_reaction("\u2705")
 
     @commands.command()
-    async def rawembed(self, ctx: commands.Context):
-        ref = ctx.message.reference
-        if not ref or not ref.message_id:
-            return await ctx.reply("Reply to an message with an embed")
-        message = ref.cached_message or await ctx.channel.fetch_message(ref.message_id)
+    async def rawembed(self, ctx: commands.Context, message: Optional[discord.Message]):
+        if not message:
+            if not ctx.message.refrence:
+                raise EmbedError("Reply to an message with an embed")
+            ref = ctx.message.reference
+            message = ref.cached_message or await ctx.channel.fetch_message(
+                ref.message_id
+            )
 
         if not message.embeds:
-            return await ctx.reply("Message had no embeds")
+            raise EmbedError("Message had no embeds")
+
         em = message.embeds[0]
         description = "```" + str(em.to_dict()) + "```"
         embed = Embed(description=description)
