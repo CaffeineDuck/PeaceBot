@@ -54,7 +54,7 @@ class UrlValidator:
 
 def colortype(value: str):
     try:
-        return int(value.replace('#', ''), base=16)
+        return int(value.replace("#", ""), base=16)
     except ValueError:
         raise InvalidColor(value)
 

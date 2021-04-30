@@ -42,7 +42,7 @@ class PeaceBot(commands.Bot):
         self.add_check(self.check)
 
         # Makes the cog-help case insensivite
-        self._botBase__cogs  = commands.core._CaseInsensitiveDict()
+        self._botBase__cogs = commands.core._CaseInsensitiveDict()
 
         if load_extensions:
             self.load_extensions(
