@@ -10,6 +10,10 @@ from models import GuildModel, CommandModel
 from typing import Optional, Union
 
 
+class CommandToggleError(commands.CommandError):
+    pass
+
+
 class Config(commands.Cog):
     """
     Configure the bot for your guild using the
@@ -105,7 +109,7 @@ class Config(commands.Cog):
         if not full_command:
             raise CommandToggleError(f"Command {command} not found!")
 
-        if full_command in self.get_commands() or command == "core":
+        if full_command in self.get_commands() or command in ["core", "config"]:
             raise CommandToggleError("You can't enable/disable the core commands!")
 
         valid_channels = ctx.guild.text_channels if channel == "all" else [ctx.channel]

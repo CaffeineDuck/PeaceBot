@@ -13,10 +13,6 @@ from models import GuildModel, CommandModel
 from typing import Optional, Union
 
 
-class CommandToggleError(commands.CommandError):
-    pass
-
-
 class MessageNotRefrenced(commands.CommandError):
     def __str__(self):
         return "Please reply to the valid message you want to re-run!"
