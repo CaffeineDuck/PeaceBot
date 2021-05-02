@@ -153,7 +153,7 @@ class PeaceBot(commands.Bot):
             and (command_check(ctx, command) or cog_check(ctx, command))
         ]
         if current_command:
-            raise CommandDisabled()
+            raise CommandDisabled(ctx.command.name, ctx.cog.qualified_name)
         return True
 
     async def on_ready(self):
