@@ -138,12 +138,12 @@ class PeaceBot(commands.Bot):
             and ctx.channel.id == command.channel
         )
         command_check = (
-            lambda ctx, command: not command.is_cog and ctx.command.name == command.name
+            lambda ctx, command: not command.is_cog and ctx.command.name.lower() == command.name.lower()
         )
         cog_check = (
             lambda ctx, cog: cog.is_cog
             and ctx.cog
-            and cog.name == ctx.cog.qualified_name
+            and cog.name.lower() == ctx.cog.qualified_name.lower()
         )
 
         current_command = [
