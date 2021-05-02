@@ -15,9 +15,7 @@ class ErrorHandler(commands.Cog):
     async def on_command_error(
         self, ctx: commands.Context, error: commands.CommandError
     ):
-        if isinstance(error, commands.CommandNotFound) or isinstance(
-            error, CommandDisabled
-        ):
+        if isinstance(error, commands.CommandNotFound):
             return
         elif isinstance(error, commands.BotMissingPermissions):
             await ctx.reply(
