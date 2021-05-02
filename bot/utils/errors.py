@@ -7,4 +7,4 @@ class CommandDisabled(CheckFailure):
         self.cog = cog
 
     def __str__(self):
-        return f"The command `{self.command}` or its command group {self.cog} has been disabled in this channel!"
+        return f"The command `{self.command}` or its command group `{self.cog}` has been disabled in this channel!"
