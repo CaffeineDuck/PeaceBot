@@ -32,6 +32,7 @@ class PeaceBot(commands.Bot):
             command_prefix=self.determine_prefix,
             intents=Intents.all(),
             help_command=HelpCommand(),
+            case_insensitive=True
         )
         self.tortoise_config = tortoise_config
         self.developement_environment = developement_environment
