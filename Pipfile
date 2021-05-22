@@ -27,7 +27,7 @@ rope = "*"
 isort = "*"
 
 [requires]
-python_version = "3.8.6"
+python_version = "3.9.5"
 
 [packages.tortoise-orm]
 extras = [ "asyncpg",]
