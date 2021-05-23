@@ -18,6 +18,7 @@ PyNaCl = "*"
 youtube_dl = "*"
 psutil = "*"
 discord-flags = "*"
+tortoise-orm = "*"
 
 [dev-packages]
 rope = "*"
