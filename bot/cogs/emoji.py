@@ -5,13 +5,16 @@ import aiohttp
 from __main__ import PeaceBot
 from discord import Color, Embed, HTTPException, Message, PartialEmoji
 from discord.ext import commands
+
+from bot.utils.mixins.better_cog import BetterCog
 from discord.ext.commands import BucketType, Greedy
 
 
-class Emoji(commands.Cog):
+class Emoji(BetterCog):
     def __init__(self, bot: PeaceBot):
         self.bot = bot
         self.emoji_extraction_pattern = re.compile(r"<(a?):([a-zA-Z0-9\_]+):([0-9]+)>")
+        super().__init__(bot)
 
     @commands.group(name="thieve", aliases=["steal"], invoke_without_command=True)
     async def thieve_group(self, ctx: commands.Context):

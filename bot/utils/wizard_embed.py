@@ -14,6 +14,8 @@ from discord import Color, Embed, Member, Message, Reaction, User
 from discord.abc import Messageable
 from discord.ext import commands
 
+from bot.utils.mixins.better_cog import BetterCog
+
 from .convert import UserInputable, convert_to_type, to_str
 
 

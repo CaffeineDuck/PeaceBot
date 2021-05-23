@@ -1,16 +1,19 @@
 import discord
 from discord.ext import commands
 
+from bot.utils.mixins.better_cog import BetterCog
+
 from bot.bot import PeaceBot
 from bot.utils.cached_reddit import RedditPostCacher
 
 
-class Reddit(commands.Cog):
+class Reddit(BetterCog):
     def __init__(self, bot: PeaceBot):
         self.bot = bot
         self.subreddits = ("aww", "memes", "cursedcomments")
         self.cache = RedditPostCacher(self.subreddits, "cache/Reddit.pickle")
         self.cache.cache_posts.start()
+        super().__init__(bot)
 
     @commands.command(aliases=["memes"])
     async def meme(self, ctx: commands.Context):

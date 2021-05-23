@@ -8,6 +8,8 @@ from discord import Color, Embed, NotFound
 from discord import __version__ as discord_version
 from discord.ext import commands
 
+from bot.utils.mixins.better_cog import BetterCog
+
 from bot.bot import PeaceBot
 from models import CommandModel, GuildModel
 
@@ -17,10 +19,7 @@ class MessageNotRefrenced(commands.CommandError):
         return "Please reply to the valid message you want to re-run!"
 
 
-class Core(commands.Cog):
-    def __init__(self, bot: PeaceBot):
-        self.bot = bot
-
+class Core(BetterCog):
     @commands.command(aliases=["latency"])
     async def ping(self, ctx: commands.Context):
         """Check latency of the bot"""

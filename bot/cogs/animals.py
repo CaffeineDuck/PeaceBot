@@ -2,13 +2,12 @@ import aiohttp
 import discord
 from discord.ext import commands
 
+from bot.utils.mixins.better_cog import BetterCog
+
 from bot.bot import PeaceBot
 
 
-class Animals(commands.Cog):
-    def __init__(self, bot: PeaceBot):
-        self.bot = bot
-
+class Animals(BetterCog):
     @commands.command(aliases=["puppy", "pup"])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def dog(self, ctx: commands.Context):

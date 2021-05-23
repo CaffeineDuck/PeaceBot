@@ -1,12 +1,11 @@
-import random
+from discord.ext import commands
 
-import asyncpraw
-from discord.ext import commands, tasks
+from bot.utils.mixins.better_cog import BetterCog
 
 from bot.utils.cached_reddit import RedditPostCacher
 
 
-class NSFW(commands.Cog):
+class NSFW(BetterCog):
     def __init__(self, bot):
         self.bot = bot
         self.subreddits = (
@@ -22,6 +21,12 @@ class NSFW(commands.Cog):
         )
         self.cache = RedditPostCacher(self.subreddits, "cache/NSFW.pickle")
         self.cache.cache_posts.start()
+        super().__init__(bot)
+
+    def cog_help_check(self, ctx: commands.Context):
+        if ctx.channel.is_nsfw():
+            return True
+        return False
 
     # NSFW COMMANDS
     @commands.command()

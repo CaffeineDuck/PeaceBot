@@ -1,6 +1,5 @@
 from discord.ext import commands
 
-
 class CommandDisabled(commands.CheckFailure):
     def __init__(self, command: str, cog: str):
         self.command = command

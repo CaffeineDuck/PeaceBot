@@ -6,6 +6,8 @@ import discord
 from akinator.async_aki import Akinator
 from discord import Color, Embed, Member, Message
 from discord.ext import commands
+
+from bot.utils.mixins.better_cog import BetterCog
 from discord.ext.commands import BucketType, Context
 
 HTTP_ERROR_VALID_RANGES = (
@@ -36,10 +38,7 @@ class AkiError(commands.CommandError):
         return self.message
 
 
-class Misc(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-
+class Misc(BetterCog):
     @commands.command(name="httpcat", aliases=["hcat"])
     async def httpcat(self, ctx, code: Union[int, str] = None):
         """Get a HTTP Cat for a HTTP error code"""

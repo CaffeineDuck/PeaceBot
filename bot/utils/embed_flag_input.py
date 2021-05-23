@@ -4,7 +4,9 @@ from typing import Dict, Iterable, TypeVar, Union
 from urllib import parse
 
 from discord import AllowedMentions, Embed, Member, User
-from discord.ext import commands, flags  # type: ignore
+from discord.ext import commands, flags
+
+from bot.utils.mixins.better_cog import BetterCog  # type: ignore
 
 _F = TypeVar(
     "_F",

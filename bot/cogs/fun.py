@@ -5,14 +5,17 @@ import aiohttp
 import discord
 from discord import Member
 from discord.ext import commands
+
+from bot.utils.mixins.better_cog import BetterCog
 from discord.ext.commands import BucketType, Greedy
 
 
-class Fun(commands.Cog):
+class Fun(BetterCog):
     def __init__(self, bot):
         """Actual Fun Commands"""
 
         self.bot = bot
+        super().__init__(bot)
 
         # Opens the json file where the gifs are situated!
         with open("bot/data/funcommands.json", "r") as json_file:

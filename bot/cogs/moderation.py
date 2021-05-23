@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 
 import discord
 from discord.ext import commands
+
+from bot.utils.mixins.better_cog import BetterCog
 from discord.ext.commands import (
     BucketType,
     bot_has_permissions,
@@ -15,10 +17,7 @@ from discord.ext.commands import (
 )
 
 
-class Moderation(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-
+class Moderation(BetterCog):
     async def create_muted_role(self, ctx: commands.Context):
         await ctx.guild.create_role(
             name="Muted",

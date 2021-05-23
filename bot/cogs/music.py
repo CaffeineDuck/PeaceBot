@@ -7,6 +7,8 @@ from functools import partial
 import discord
 from async_timeout import timeout
 from discord.ext import commands
+
+from bot.utils.mixins.better_cog import BetterCog
 from youtube_dl import YoutubeDL
 
 ytdlopts = {
@@ -182,7 +184,7 @@ class MusicPlayer:
         return self.bot.loop.create_task(self._cog.cleanup(guild))
 
 
-class Music(commands.Cog):
+class Music(BetterCog):
     """Music related commands."""
 
     __slots__ = ("bot", "players")

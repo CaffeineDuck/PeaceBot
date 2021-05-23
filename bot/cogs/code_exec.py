@@ -3,15 +3,18 @@ import re
 from discord import Color, Embed
 from discord.ext import commands
 
+from bot.utils.mixins.better_cog import BetterCog
+
 from bot.bot import PeaceBot
 from config.bot import bot_config
 
 
-class CodeExec(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+class CodeExec(BetterCog):
+    def __init__(self, bot: PeaceBot):
         self.bot = bot
         # TODO: Improve this further
         self.regex = re.compile(r"(\w*)\s*(?:```)(\w*)?([\s\S]*)(?:```$)")
+        super().__init__(bot)
 
     @property
     def session(self):

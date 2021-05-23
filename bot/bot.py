@@ -1,13 +1,13 @@
 import logging
 import os
-import re
 import traceback
 from typing import List
 
 import watchgod
 from cachetools import LRUCache
-from discord import Color, Embed, Intents, Member, Message
+from discord import Intents, Message
 from discord.ext import commands, tasks
+
 from tortoise import Tortoise
 
 from bot.help_command import HelpCommand
@@ -50,7 +50,6 @@ class PeaceBot(commands.Bot):
                     "bot.cogs.core",
                     "bot.cogs.config",
                     "bot.cogs.personal_guild",
-                    "bot.cogs.error",
                     "bot.cogs.snipe",
                     "bot.cogs.emoji",
                     "bot.cogs.moderation",
@@ -62,6 +61,8 @@ class PeaceBot(commands.Bot):
                     "bot.cogs.reddit",
                     "bot.cogs.animals",
                     "bot.cogs.code_exec",
+                    "bot.cogs.error",
+                    "bot.cogs.prabhidhikaar",
                 )
             )
         if loadjsk:

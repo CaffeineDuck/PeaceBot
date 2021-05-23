@@ -3,6 +3,8 @@ from typing import Optional, Union
 
 import discord
 from discord.ext import commands
+
+from bot.utils.mixins.better_cog import BetterCog
 from discord.ext.commands import BucketType
 
 from bot.bot import PeaceBot
@@ -14,15 +16,11 @@ class CommandToggleError(commands.CommandError):
 
 
 # TODO: Make the command's role/perms customizable
-class Config(commands.Cog):
+class Config(BetterCog):
     """
     Configure the bot for your guild using the
     commands in this extension.
     """
-
-    def __init__(self, bot: PeaceBot):
-        self.bot = bot
-
     @commands.command()
     @commands.cooldown(1, 10, BucketType.user)
     @commands.has_permissions(manage_guild=True)

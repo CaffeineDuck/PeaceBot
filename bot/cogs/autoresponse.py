@@ -9,6 +9,8 @@ import discord
 from cachetools import TTLCache
 from discord import Color, Embed
 from discord.ext import commands
+
+from bot.utils.mixins.better_cog import BetterCog
 from discord.ext.commands import BucketType
 
 from bot.bot import PeaceBot
@@ -18,12 +20,13 @@ from config.personal_guild import personal_guild
 from models import AutoResponseModel, GuildModel, UserModel
 
 
-class AutoResponses(commands.Cog):
+class AutoResponses(BetterCog):
     """Manage the autoresponses in this server"""
 
     def __init__(self, bot: PeaceBot):
         self.bot = bot
         self.autoresponse_cache = TTLCache(maxsize=1000, ttl=600)
+        super().__init__(bot)
 
     # Runs before every command invokation
     async def cog_before_invoke(self, ctx: commands.Context) -> None:

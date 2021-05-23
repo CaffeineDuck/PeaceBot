@@ -4,13 +4,12 @@ import discord
 from discord import Color, Embed
 from discord.ext import commands
 
+from bot.utils.mixins.better_cog import BetterCog
+
 from bot.utils.errors import CommandDisabled
 
 
-class ErrorHandler(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-
+class ErrorHandler(BetterCog):
     @commands.Cog.listener()
     async def on_command_error(
         self, ctx: commands.Context, error: commands.CommandError

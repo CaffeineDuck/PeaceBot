@@ -3,6 +3,8 @@ from datetime import datetime
 from cachetools import TTLCache
 from discord import Color, Embed
 from discord.ext import commands
+
+from bot.utils.mixins.better_cog import BetterCog
 from discord.ext.commands import BucketType
 
 
@@ -11,11 +13,12 @@ class NoSnipeableMessage(commands.CommandError):
         return "There aren't any recent message that have been deleted/ edited!"
 
 
-class Snipe(commands.Cog):
+class Snipe(BetterCog):
     def __init__(self, bot, *args, **kwargs):
         self.bot = bot
         self.delete_snipes = TTLCache(100, 600)
         self.edit_snipes = TTLCache(100, 600)
+        super().__init__(bot)
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):

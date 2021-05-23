@@ -1,42 +1,45 @@
 import discord
 from discord.ext import commands
 
+from bot.utils.mixins.better_cog import BetterCog
+
+from bot.utils.errors import NotPersonalGuild
 from config.personal_guild import personal_guild
 
 
-class NotPersonalGuild(commands.CommandError):
-    def __str__(self):
-        return "This command can only be used in my personal guild!"
-
-
-class PersonalGuild(commands.Cog):
+class PersonalGuild(BetterCog):
     """
     Extension full of commands only for the
     personal server.
     """
 
-    def __init__(self, bot):
-        self.bot = bot
-
-    def is_personal_guild(ctx: commands.Context):
-        if ctx.guild.id == personal_guild.guild_id:
+    def cog_check(self, ctx: commands.Context):
+        if not ctx.guild.id in personal_guild.ids:
+            raise NotPersonalGuild()
+        return True
+    
+    def cog_help_check(self, ctx: commands.Context):
+        if ctx.guild.id in personal_guild.ids:
             return True
-        raise NotPersonalGuild()
+        return False
 
     @commands.command()
-    @commands.check(is_personal_guild)
     async def gn(self, ctx: commands.Context, user: discord.Member = None):
         """Goodnight Command"""
         user = user or ctx.author
         await ctx.reply(f"Get Naked {user.mention}")
 
     @commands.command(aliases=["s", "say"])
-    @commands.check(is_personal_guild)
     async def send(self, ctx, member: discord.Member, *, message="No reason provided"):
         try:
             await member.send(f"{ctx.author.mention} said: {message}")
         except Exception:
             await ctx.reply(f"{member.mention} has his/her DMs closed. :(")
+
+    # TODO: Last to leave VC!
+    # @commands.Cog.listener()
+    # async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
+    #     if member.voice
 
 
 def setup(bot: commands.Bot):

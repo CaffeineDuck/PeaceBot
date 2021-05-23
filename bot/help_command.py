@@ -3,9 +3,7 @@ from typing import List, Mapping, Optional
 from discord import Color, Embed
 from discord.ext import commands
 
-INVISIBLE_COGS = ["ErrorHandler", "Jishaku", "PersonalGuild"]
-
-NSFW_COGS = ["NSFW"]
+NO_ACCESS_COGS=['Jishaku', 'ErrorHandler']
 
 
 class HelpCommand(commands.HelpCommand):
@@ -20,10 +18,10 @@ class HelpCommand(commands.HelpCommand):
         return True
 
     def command_not_found(self, string: str) -> str:
-        return f"I don't have the command `{string}`, if you have an idea for this use `suggest` command!"
+        return f"I don't have the command `{string}`"
 
     def subcommand_not_found(self, command: commands.Command, string: str) -> str:
-        return f"I don't have the command `{command.qualified_name} {string}`, if you have an idea for this use `suggest` command!"
+        return f"I don't have the command `{command.qualified_name} {string}`"
 
     async def dispatch_help(self, help_embed: Embed) -> None:
         dest = self.get_destination()
@@ -48,9 +46,7 @@ class HelpCommand(commands.HelpCommand):
         )
 
         for cog in self.context.bot.cogs.values():
-            if cog.qualified_name in INVISIBLE_COGS or not await self.nsfw_cog_checker(
-                cog
-            ):
+            if cog.qualified_name in NO_ACCESS_COGS or cog.hidden or not cog.cog_help_check(self.context):
                 continue
             embed.add_field(
                 name=cog.qualified_name,
@@ -106,6 +102,9 @@ class HelpCommand(commands.HelpCommand):
         await self.dispatch_help(embed)
 
     async def send_cog_help(self, cog: commands.Cog) -> None:
+        if cog.qualified_name in NO_ACCESS_COGS or not cog.help_check(self.context):
+            raise self.command_not_found(cog.qualified_name)
+
         embed = Embed(
             title=f"Help for extension: `{cog.qualified_name}`",
             description="Ooooh ther's lots of fun stuff in here!",

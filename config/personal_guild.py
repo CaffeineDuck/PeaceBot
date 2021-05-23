@@ -2,7 +2,7 @@ from pydantic import BaseSettings
 
 
 class PersonalGuild(BaseSettings):
-    id: int
+    ids: list
 
     class Config:
         env_file = ".env"

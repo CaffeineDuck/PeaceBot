@@ -7,6 +7,8 @@ from __main__ import PeaceBot
 from discord import Embed, Message, TextChannel
 from discord.ext import commands, flags
 
+from bot.utils.mixins.better_cog import BetterCog
+
 from bot.utils.embed_flag_input import (
     allowed_mentions_input,
     dict_to_allowed_mentions,
@@ -29,10 +31,7 @@ class EmbedError(commands.CommandError):
     pass
 
 
-class Utils(commands.Cog):
-    def __init__(self, bot: PeaceBot):
-        self.bot = bot
-
+class Utils(BetterCog):
     @commands.command(name="avatar", aliases=["av"])
     async def show_avatar(
         self, ctx: commands.Context, member: Optional[discord.Member]
