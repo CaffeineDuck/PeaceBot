@@ -1,19 +1,19 @@
 import os
+from typing import Optional, Union
 
 import discord
 from discord.ext import commands
 from discord.ext.commands import BucketType
 
 from bot.bot import PeaceBot
-from models import GuildModel, CommandModel
-
-from typing import Optional, Union
+from models import CommandModel, GuildModel
 
 
 class CommandToggleError(commands.CommandError):
     pass
 
 
+# TODO: Make the command's role/perms customizable
 class Config(commands.Cog):
     """
     Configure the bot for your guild using the

@@ -1,16 +1,15 @@
 import platform
 import sys
+from typing import Optional, Union
 
-import psutil
-from bot.bot import PeaceBot
 import discord
+import psutil
 from discord import Color, Embed, NotFound
 from discord import __version__ as discord_version
 from discord.ext import commands
 
-from models import GuildModel, CommandModel
-
-from typing import Optional, Union
+from bot.bot import PeaceBot
+from models import CommandModel, GuildModel
 
 
 class MessageNotRefrenced(commands.CommandError):

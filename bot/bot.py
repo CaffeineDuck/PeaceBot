@@ -11,9 +11,8 @@ from discord.ext import commands, tasks
 from tortoise import Tortoise
 
 from bot.help_command import HelpCommand
-from models import GuildModel, CommandModel
-
 from bot.utils.errors import CommandDisabled
+from models import CommandModel, GuildModel
 
 logging.basicConfig(level=logging.INFO)
 
@@ -32,7 +31,7 @@ class PeaceBot(commands.Bot):
             command_prefix=self.determine_prefix,
             intents=Intents.all(),
             help_command=HelpCommand(),
-            case_insensitive=True
+            case_insensitive=True,
         )
         self.tortoise_config = tortoise_config
         self.developement_environment = developement_environment
@@ -126,6 +125,7 @@ class PeaceBot(commands.Bot):
             except Exception as e:
                 traceback.print_exception(type(e), e, e.__traceback__)
 
+    # TODO: Add permission/ role check!
     async def check(self, ctx: commands.Context):
         commands = self.commands_cache.get(ctx.guild.id)
 
@@ -138,7 +138,8 @@ class PeaceBot(commands.Bot):
             and ctx.channel.id == command.channel
         )
         command_check = (
-            lambda ctx, command: not command.is_cog and ctx.command.name.lower() == command.name.lower()
+            lambda ctx, command: not command.is_cog
+            and ctx.command.name.lower() == command.name.lower()
         )
         cog_check = (
             lambda ctx, cog: cog.is_cog

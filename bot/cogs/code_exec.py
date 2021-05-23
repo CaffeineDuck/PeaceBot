@@ -3,8 +3,8 @@ import re
 from discord import Color, Embed
 from discord.ext import commands
 
-from config.bot import bot_config
 from bot.bot import PeaceBot
+from config.bot import bot_config
 
 
 class CodeExec(commands.Cog):
