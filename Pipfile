@@ -19,6 +19,8 @@ youtube_dl = "*"
 psutil = "*"
 discord-flags = "*"
 tortoise-orm = "*"
+asyncpg = "*"
+pypika = "*"
 
 [dev-packages]
 rope = "*"
