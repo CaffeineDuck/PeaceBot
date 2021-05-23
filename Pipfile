@@ -12,24 +12,15 @@ PyYAML = "*"
 asyncpraw = "*"
 pydantic = "*"
 watchgod = "*"
-autopep8 = "*"
 "akinator.py" = "*"
 cachetools = "*"
 PyNaCl = "*"
 youtube_dl = "*"
 psutil = "*"
-PyPika = "*"
 discord-flags = "*"
-fastapi = "*"
-isort = "*"
 
 [dev-packages]
 rope = "*"
-isort = "*"
 
 [requires]
 python_version = "3.9.5"
-
-[packages]
-tortoise-orm = {extras = [ "asyncpg",]}
-uvicorn = {extras = [ "standard",]}
