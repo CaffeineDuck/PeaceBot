@@ -98,7 +98,7 @@ class LastToLeaveVc(BetterCog):
                 f"Reply with `{word}` within the next 120 seconds or get kicked!"
             )
         except discord.Forbidden:
-            await ltlvc_text_channel.send('{member.mention} **Reply this msg with** `{word}` withing the next 120 secs or get kicked!')
+            await ltlvc_text_channel.send(f'{member.mention} **Reply this msg with** `{word}` withing the next 120 secs or get kicked!')
 
         try:
             await self.bot.wait_for(
