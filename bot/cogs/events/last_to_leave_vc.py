@@ -93,7 +93,7 @@ class LastToLeaveVc(BetterCog):
 
         try:
             def msg_check(m):
-                return m.content.lower() == word
+                return m.content.lower() == word and m.author.id == member.id
 
             await self.bot.wait_for(
                 "message", check=msg_check, timeout=120
