@@ -92,8 +92,11 @@ class LastToLeaveVc(BetterCog):
         )
 
         try:
+            def msg_check(m):
+                return m.content.lower() == word
+
             await self.bot.wait_for(
-                "message", check=lambda m: m.content.lower() == word, timeout=120
+                "message", check=msg_check, timeout=120
             )
             await member.send("You passed the AFK check!")
         except asyncio.TimeoutError:
