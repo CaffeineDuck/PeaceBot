@@ -3,11 +3,10 @@ from typing import Optional, Union
 
 import discord
 from discord.ext import commands
-
-from bot.utils.mixins.better_cog import BetterCog
 from discord.ext.commands import BucketType
 
 from bot.bot import PeaceBot
+from bot.utils.mixins.better_cog import BetterCog
 from models import CommandModel, GuildModel
 
 
@@ -21,6 +20,7 @@ class Config(BetterCog):
     Configure the bot for your guild using the
     commands in this extension.
     """
+
     @commands.command()
     @commands.cooldown(1, 10, BucketType.user)
     @commands.has_permissions(manage_guild=True)

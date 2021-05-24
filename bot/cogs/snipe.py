@@ -3,9 +3,9 @@ from datetime import datetime
 from cachetools import TTLCache
 from discord import Color, Embed
 from discord.ext import commands
+from discord.ext.commands import BucketType
 
 from bot.utils.mixins.better_cog import BetterCog
-from discord.ext.commands import BucketType
 
 
 class NoSnipeableMessage(commands.CommandError):

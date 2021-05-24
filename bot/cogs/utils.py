@@ -7,8 +7,6 @@ from __main__ import PeaceBot
 from discord import Embed, Message, TextChannel
 from discord.ext import commands, flags
 
-from bot.utils.mixins.better_cog import BetterCog
-
 from bot.utils.embed_flag_input import (
     allowed_mentions_input,
     dict_to_allowed_mentions,
@@ -17,6 +15,7 @@ from bot.utils.embed_flag_input import (
     process_message_mentions,
     webhook_input,
 )
+from bot.utils.mixins.better_cog import BetterCog
 
 flags._converters.CONVERTERS["Message"] = commands.MessageConverter().convert
 

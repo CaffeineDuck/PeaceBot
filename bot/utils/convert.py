@@ -21,9 +21,9 @@ from discord import (
     VoiceChannel,
 )
 from discord.ext import commands
+from discord.utils import escape_markdown, escape_mentions
 
 from bot.utils.mixins.better_cog import BetterCog
-from discord.utils import escape_markdown, escape_mentions
 
 UserInputable = Union[
     str,

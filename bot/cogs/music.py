@@ -7,9 +7,9 @@ from functools import partial
 import discord
 from async_timeout import timeout
 from discord.ext import commands
+from youtube_dl import YoutubeDL
 
 from bot.utils.mixins.better_cog import BetterCog
-from youtube_dl import YoutubeDL
 
 ytdlopts = {
     "format": "bestaudio/best",

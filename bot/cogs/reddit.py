@@ -1,10 +1,9 @@
 import discord
 from discord.ext import commands
 
-from bot.utils.mixins.better_cog import BetterCog
-
 from bot.bot import PeaceBot
 from bot.utils.cached_reddit import RedditPostCacher
+from bot.utils.mixins.better_cog import BetterCog
 
 
 class Reddit(BetterCog):

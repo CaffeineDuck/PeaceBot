@@ -5,9 +5,9 @@ import aiohttp
 import discord
 from discord import Member
 from discord.ext import commands
+from discord.ext.commands import BucketType, Greedy
 
 from bot.utils.mixins.better_cog import BetterCog
-from discord.ext.commands import BucketType, Greedy
 
 
 class Fun(BetterCog):

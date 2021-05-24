@@ -3,7 +3,7 @@ from typing import List, Mapping, Optional
 from discord import Color, Embed
 from discord.ext import commands
 
-NO_ACCESS_COGS=['Jishaku', 'ErrorHandler']
+NO_ACCESS_COGS = ["Jishaku", "ErrorHandler"]
 
 
 class HelpCommand(commands.HelpCommand):
@@ -46,7 +46,11 @@ class HelpCommand(commands.HelpCommand):
         )
 
         for cog in self.context.bot.cogs.values():
-            if cog.qualified_name in NO_ACCESS_COGS or cog.hidden or not cog.cog_help_check(self.context):
+            if (
+                cog.qualified_name in NO_ACCESS_COGS
+                or cog.hidden
+                or not cog.cog_help_check(self.context)
+            ):
                 continue
             embed.add_field(
                 name=cog.qualified_name,

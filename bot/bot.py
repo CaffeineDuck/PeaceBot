@@ -7,7 +7,6 @@ import watchgod
 from cachetools import LRUCache
 from discord import Intents, Message
 from discord.ext import commands, tasks
-
 from tortoise import Tortoise
 
 from bot.help_command import HelpCommand

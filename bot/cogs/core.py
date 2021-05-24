@@ -8,9 +8,8 @@ from discord import Color, Embed, NotFound
 from discord import __version__ as discord_version
 from discord.ext import commands
 
-from bot.utils.mixins.better_cog import BetterCog
-
 from bot.bot import PeaceBot
+from bot.utils.mixins.better_cog import BetterCog
 from models import CommandModel, GuildModel
 
 

@@ -1,9 +1,8 @@
 import discord
 from discord.ext import commands
 
-from bot.utils.mixins.better_cog import BetterCog
-
 from bot.utils.errors import NotPersonalGuild
+from bot.utils.mixins.better_cog import BetterCog
 from config.personal_guild import personal_guild
 
 
@@ -17,7 +16,7 @@ class PersonalGuild(BetterCog):
         if not ctx.guild.id in personal_guild.ids:
             raise NotPersonalGuild()
         return True
-    
+
     def cog_help_check(self, ctx: commands.Context):
         if ctx.guild.id in personal_guild.ids:
             return True

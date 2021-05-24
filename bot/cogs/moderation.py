@@ -5,8 +5,6 @@ from datetime import datetime, timedelta
 
 import discord
 from discord.ext import commands
-
-from bot.utils.mixins.better_cog import BetterCog
 from discord.ext.commands import (
     BucketType,
     bot_has_permissions,
@@ -15,6 +13,8 @@ from discord.ext.commands import (
     guild_only,
     has_permissions,
 )
+
+from bot.utils.mixins.better_cog import BetterCog
 
 
 class Moderation(BetterCog):

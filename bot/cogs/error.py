@@ -4,9 +4,8 @@ import discord
 from discord import Color, Embed
 from discord.ext import commands
 
-from bot.utils.mixins.better_cog import BetterCog
-
 from bot.utils.errors import CommandDisabled
+from bot.utils.mixins.better_cog import BetterCog
 
 
 class ErrorHandler(BetterCog):

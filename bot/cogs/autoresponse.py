@@ -9,12 +9,11 @@ import discord
 from cachetools import TTLCache
 from discord import Color, Embed
 from discord.ext import commands
-
-from bot.utils.mixins.better_cog import BetterCog
 from discord.ext.commands import BucketType
 
 from bot.bot import PeaceBot
 from bot.utils.autoresponse_handler import AutoResponseError, AutoResponseHandler
+from bot.utils.mixins.better_cog import BetterCog
 from bot.utils.wizard_embed import Prompt, Wizard
 from config.personal_guild import personal_guild
 from models import AutoResponseModel, GuildModel, UserModel

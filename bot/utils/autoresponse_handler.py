@@ -5,9 +5,8 @@ import discord
 from cachetools import TTLCache
 from discord.ext import commands
 
-from bot.utils.mixins.better_cog import BetterCog
-
 from bot.bot import PeaceBot
+from bot.utils.mixins.better_cog import BetterCog
 from models import AutoResponseModel
 
 

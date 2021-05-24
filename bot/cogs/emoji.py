@@ -5,9 +5,9 @@ import aiohttp
 from __main__ import PeaceBot
 from discord import Color, Embed, HTTPException, Message, PartialEmoji
 from discord.ext import commands
+from discord.ext.commands import BucketType, Greedy
 
 from bot.utils.mixins.better_cog import BetterCog
-from discord.ext.commands import BucketType, Greedy
 
 
 class Emoji(BetterCog):
