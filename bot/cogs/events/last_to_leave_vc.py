@@ -69,6 +69,7 @@ class LastToLeaveVc(BetterCog):
             asyncio.create_task(self.dm_random_check(member))
 
     async def dm_random_check(self, member: discord.Member):
+        guild: discord.Guild = self.bot.get_guild(PRABHIDHIKAAR_GUILD_ID)
         random_words = [
             "banana",
             "nettles",
@@ -83,18 +84,23 @@ class LastToLeaveVc(BetterCog):
             "sussy",
         ]
         word = random.choice(random_words)
-        await member.send(
-            f"Reply with `{word}` within the next 120 seconds or get kicked!"
-        )
 
         logging_channel = discord.utils.get(
             member.guild.text_channels, id=LTLVC_EVENT_LOGGING_CHANNEL_ID
         )
+        ltlvc_text_channel = guild.get_channel(846314590056480769)
 
-        try:
-            def msg_check(m):
+        def msg_check(m):
                 return m.content.lower() == word and m.author.id == member.id
 
+        try:
+            await member.send(
+                f"Reply with `{word}` within the next 120 seconds or get kicked!"
+            )
+        except discord.Forbidden:
+            await ltlvc_text_channel.send('{member.mention} **Reply this msg with** `{word}` withing the next 120 secs or get kicked!')
+
+        try:
             await self.bot.wait_for(
                 "message", check=msg_check, timeout=120
             )
