@@ -21,9 +21,14 @@ discord-flags = "*"
 tortoise-orm = "*"
 asyncpg = "*"
 pypika = "*"
+pillow = "*"
 
 [dev-packages]
 rope = "*"
+black = "*"
 
 [requires]
 python_version = "3.9.5"
+
+[pipenv]
+allow_prereleases = true
