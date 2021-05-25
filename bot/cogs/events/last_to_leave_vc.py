@@ -91,19 +91,19 @@ class LastToLeaveVc(BetterCog):
         ltlvc_text_channel = guild.get_channel(846314590056480769)
 
         def msg_check(m):
-                return m.content.lower() == word and m.author.id == member.id
+            return m.content.lower() == word and m.author.id == member.id
 
         try:
             await member.send(
                 f"Reply with `{word}` within the next 120 seconds or get kicked!"
             )
         except discord.Forbidden:
-            await ltlvc_text_channel.send(f'{member.mention} **Reply this msg with** `{word}` withing the next 120 secs or get kicked!')
+            await ltlvc_text_channel.send(
+                f"{member.mention} **Reply this msg with** `{word}` withing the next 120 secs or get kicked!"
+            )
 
         try:
-            await self.bot.wait_for(
-                "message", check=msg_check, timeout=120
-            )
+            await self.bot.wait_for("message", check=msg_check, timeout=120)
             await member.send("You passed the AFK check!")
         except asyncio.TimeoutError:
             embed = discord.Embed(
