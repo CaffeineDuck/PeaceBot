@@ -13,6 +13,16 @@ class GuildModel(Model):
         description="Custom prefix of the guild",
     )
     users = fields.ManyToManyField("main.UserModel", related_name="Guild")
+    image_banner = fields.TextField(
+        description="BackGround image banner for the `rank` command", null=True
+    )
+    xp_multiplier = fields.IntField(description="Xp Multipication Value", default=1)
+    xp_role_rewards = fields.JSONField(
+        description="Role Rewards Level -> Role Mapping", null=True
+    )
+    xp_members: fields.ManyToManyRelation['LevelingUserModel'] = fields.ManyToManyField(
+        "main.LevelingUserModel", related_name="LevelingUserModel"
+    )
 
     @classmethod
     async def from_id(cls, guild_id: int):
@@ -33,7 +43,6 @@ class GuildModel(Model):
 
 class UserModel(Model):
     id = fields.BigIntField(pk=True, description="Discord ID of the user")
-    guild = fields.ManyToManyField("main.GuildModel", related_name="User")
 
     class Meta:
         table = "users"
@@ -85,3 +94,20 @@ class CommandModel(Model):
         table_description = (
             "Represets all the enabled and disabled commands for each Guild"
         )
+
+
+class LevelingUserModel(Model):
+    id = fields.UUIDField(pk=True)
+    user = fields.ForeignKeyField("main.UserModel", related_name="LevelingUser")
+    guild = fields.ForeignKeyField("main.GuildModel", related_name="LevelingUser")
+    xp = fields.BigIntField(
+        description="XP of the user in that guild!", default=0, null=True
+    )
+    level = fields.IntField(description="Level of the user!", default=0, null=True)
+    image_banner = fields.TextField(
+        description="BackGround image banner for the `rank` command", null=True
+    )
+
+    class Meta:
+        table = "UserLeveling"
+        table_description = "Represents the Leveling data for each user in a guild!"
