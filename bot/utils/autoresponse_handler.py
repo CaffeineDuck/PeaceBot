@@ -47,7 +47,12 @@ class AutoResponseHandler:
 
     async def message_is_valid(self):
         message = self._message
-        if message.author.bot or message.embeds or not message.content:
+        if (
+            message.author.bot
+            or message.embeds
+            or not message.content
+            or not message.guild
+        ):
             return False
         return True
 
