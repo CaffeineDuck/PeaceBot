@@ -3,6 +3,7 @@ import os
 import traceback
 from typing import List
 
+import discord
 import watchgod
 from cachetools import LRUCache
 from discord import Intents, Message
@@ -11,7 +12,7 @@ from tortoise import Tortoise
 
 from bot.help_command import HelpCommand
 from bot.utils.errors import CommandDisabled
-from models import CommandModel, GuildModel
+from models import CommandModel, GuildModel, UserModel
 
 logging.basicConfig(level=logging.INFO)
 
@@ -38,6 +39,8 @@ class PeaceBot(commands.Bot):
         self.prefix = prefix
         self.prefixes_cache = LRUCache(1000)
         self.commands_cache = LRUCache(1000)
+        self.users_cache = LRUCache(1000)
+        self.guilds_cache = LRUCache(1000)
         self.add_check(self.check)
 
         # Makes the cog-help case insensivite
@@ -62,6 +65,7 @@ class PeaceBot(commands.Bot):
                     "bot.cogs.code_exec",
                     "bot.cogs.error",
                     "bot.cogs.prabhidhikaar",
+                    "bot.cogs.leveling",
                 )
             )
         if loadjsk:
@@ -124,6 +128,26 @@ class PeaceBot(commands.Bot):
                 print(f"Loaded {ext}")
             except Exception as e:
                 traceback.print_exception(type(e), e, e.__traceback__)
+
+    async def on_message(self, message: Message):
+        user = self.users_cache.get(message.author.id)
+        guild = self.guilds_cache.get(message.guild.id)
+
+        if not guild:
+            guild = await GuildModel.get(id=message.guild.id)
+            self.guilds_cache[message.guild.id] = guild
+
+        if not user:
+            user, is_new = await UserModel.get_or_create(id=message.author.id)
+            self.users_cache[message.author.id] = user
+
+            if is_new:
+                await guild.users.add(user)
+
+        await self.process_commands(message)
+
+    async def on_guild_join(self, guild: discord.Guild):
+        await GuildModel.get_or_create(id=guild.id).prefetch("GuildModel", "UserModel")
 
     # TODO: Add permission/ role check!
     async def check(self, ctx: commands.Context):
