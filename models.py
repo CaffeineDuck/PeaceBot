@@ -107,6 +107,7 @@ class LevelingUserModel(Model):
     image_banner = fields.TextField(
         description="BackGround image banner for the `rank` command", null=True
     )
+    messages = fields.IntField(description='No. of messages sent by the user!', default=0)
 
     class Meta:
         table = "UserLeveling"
