@@ -2,9 +2,9 @@ import logging
 import os
 import re
 import traceback
-from typing import List
 from asyncio import sleep
 from itertools import cycle
+from typing import List
 
 import discord
 import watchgod
