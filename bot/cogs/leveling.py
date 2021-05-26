@@ -70,7 +70,7 @@ class Leveling(BetterCog):
         if not guild_model or not user_model:
             print(f'MODELS NOT FOUND FOR {message.author}, GUILDMODEL: {guild_model}, USERMODEL: {user_model}')
             await asyncio.sleep(2)
-            await self.get_user_guild_cache(message)
+            guild_model, user_model = await self.get_user_guild_cache(message)
 
         return guild_model, user_model
 
