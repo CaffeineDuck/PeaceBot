@@ -39,11 +39,15 @@ class Leveling(BetterCog):
             (message.guild.id, message.author.id)
         )
 
-        guild_model, _ = await self.get_user_guild_cache(message)
+        guild_model, user_model = await self.get_user_guild_cache(message)
+
+        if not guild_model or not user_model:
+            print(f'MODELS NOT FOUND FOR {message.author}, GUILDMODEL: {guild_model}, USERMODEL: {user_model}')
+            return
 
         if not leveling_user:
             leveling_user, is_new = await LevelingUserModel.get_or_create(
-                user__id=message.author.id, guild__id=message.guild.id
+                user=user_model, guild=guild_model
             )
             if is_new:
                 await guild_model.xp_members.add(leveling_user)
@@ -63,7 +67,7 @@ class Leveling(BetterCog):
         guild_model = self.bot.guilds_cache.get(message.guild.id)
         user_model = self.bot.users_cache.get(message.author.id)
 
-        if not guild_model or user_model:
+        if not guild_model or not user_model:
             await asyncio.sleep(2)
             self.get_user_guild_cache(message)
 
