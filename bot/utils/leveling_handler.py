@@ -1,8 +1,10 @@
 import asyncio
 from dataclasses import dataclass
+from itertools import islice
 import random
 import re
 from typing import List, Mapping, Tuple
+import aiohttp
 
 import discord
 from cachetools import LRUCache
@@ -19,12 +21,18 @@ class UserRank:
     position: int
     level: int
     required_xp: int
+    messages: int
     guild_model: GuildModel
 
 
 class UserNotRanked(commands.CommandError):
     def __str__(self):
         return "User Hasn't Been Ranked Yet!"
+
+
+class Mee6DataNotFound(commands.CommandError):
+    def __str__(self):
+        return "Mee6 data for this guild not found!"
 
 
 class LevelingHandler:
@@ -56,7 +64,10 @@ class LevelingHandler:
 
         if not guild_model:
             await asyncio.sleep(2)
-            guild_model = await self.get_guild(guild_id)
+            guild_model = self._bot.guilds_cache.get(guild_id)
+
+            if not guild_model:
+                guild_model = GuildModel.get(id=guild_id)
 
         return guild_model
 
@@ -65,7 +76,10 @@ class LevelingHandler:
 
         if not user_model:
             await asyncio.sleep(2)
-            user_model = await self.get_user(user_id)
+            user_model = self._bot.users_cache.get(user_id)
+
+            if not user_model:
+                user_model, _ = await UserModel.get_or_create(id=user_id)
 
         return user_model
 
@@ -100,30 +114,33 @@ class LevelingHandler:
             user_model.level += 1
             self.dispatch_level_up_event(user_model)
         return user_model.level
-    
-    async def get_user_level_from_xp(self, user_model: LevelingUserModel) -> int:
+
+    async def get_user_level_from_xp(self, xp: int) -> int:
         level = 0
         while True:
-            if user_model.xp < self.required_xp_for_level(level):
+            if xp < self.required_xp_for_level(level):
                 break
             level += 1
         return level
 
-    async def update_user_xp_and_level(
+    async def update_user(
         self, user: LevelingUserModel, guild: GuildModel
     ) -> LevelingUserModel:
         user.xp += random.randint(15, 25) * guild.xp_multiplier
         user.level = await self.get_user_level(user)
+        user.messages += 1
         return user
 
     async def handle_user_message(self, message: discord.Message) -> None:
         # Setting the message as it is used all over the class
         self._message = message
-        
+
         guild_model = await self.get_guild(message.guild.id)
         user_model = await self.get_user(message.author.id)
-        leveling_user_model = await self.get_leveling_user(guild_model.id, user_model.id)
-        updated_user = await self.update_user_xp_and_level(leveling_user_model, guild_model)
+        leveling_user_model = await self.get_leveling_user(
+            guild_model.id, user_model.id
+        )
+        updated_user = await self.update_user(leveling_user_model, guild_model)
         self.update_leveling_cache(updated_user)
 
     async def get_user_rank(self, member: discord.Member) -> UserRank:
@@ -145,9 +162,41 @@ class LevelingHandler:
         new_level_xp = self.required_xp_for_level(user_model.level)
 
         user_rank = UserRank(
-            member.id, user_model.xp, index, user_model.level, new_level_xp, guild_model
+            member.id,
+            user_model.xp,
+            index,
+            user_model.level,
+            new_level_xp,
+            user_model.messages,
+            guild_model,
         )
         return user_rank
+
+    async def import_from_mee6(self, guild_id: int) -> None:
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(
+                f"https://mee6.xyz/api/plugins/levels/leaderboard/{guild_id}?limit=999&page=0"
+            ) as r:
+                if r.status == 404:
+                    raise Mee6DataNotFound()
+                data = await r.json()
+
+        members = [
+            self.update_db_from_other(guild_id, member)
+            for member in data.get("players")
+        ]
+        await asyncio.gather(*members)
+
+    async def update_db_from_other(self, guild_id: int, member: dict) -> None:
+        user = await self.get_leveling_user(guild_id, member.get("id"))
+        user_level = await self.get_user_level_from_xp(member.get("xp"))
+
+        user.messages = member.get("message_count")
+        user.xp = member.get("xp")
+        user.level = user_level
+
+        asyncio.create_task(self.save_in_db(user))
+        self._user_check_cache[(user.guild_id, user.user_id)] = user
 
     @tasks.loop(minutes=1)
     async def bulk_update_db(self) -> None:
@@ -165,5 +214,8 @@ class LevelingHandler:
         check_cache = self._user_check_cache.get((model.guild_id, model.user_id))
         if model == check_cache:
             return
-        await model.save()
+        asyncio.create_task(self.save_in_db(model))
         self._user_check_cache[(model.guild_id, model.user_id)] = model
+
+    async def save_in_db(self, model: LevelingUserModel) -> None:
+        await model.save()

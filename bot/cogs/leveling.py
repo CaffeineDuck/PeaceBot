@@ -56,11 +56,22 @@ class Leveling(BetterCog):
             color=discord.Color(random.randint(0, 0xFFFFFF)),
             timestamp=ctx.message.created_at,
         )
-        embed.add_field(name="Position", value=f"#{user_rank.position}")
-        embed.add_field(name="Level", value=user_rank.level)
-        embed.add_field(name="XP", value=f"{user_rank.xp}/{user_rank.required_xp}")
+        embed.add_field(name="Position", value=f"#{user_rank.position}", inline=False)
+        embed.add_field(name="Level", value=user_rank.level, inline=False)
+        embed.add_field(name="XP", value=f"{user_rank.xp}/{user_rank.required_xp}", inline=False)
+        embed.add_field(name="Messages Sent", value=user_rank.messages, inline=False)
 
         await ctx.reply(embed=embed)
+
+    @commands.command(aliases=["ipm6lv"])
+    @commands.has_permissions(manage_guild=True)
+    async def importmee6levels(self, ctx: commands.Context):
+        await ctx.reply(
+            "**Please Wait!** The wait time may vary according to the number of members in this server!"
+        )
+        async with ctx.typing():
+            await self.leveling_handler.import_from_mee6(ctx.guild.id)
+            await ctx.reply("**Mee6 Data has been imported!**")
 
 
 def setup(bot):
