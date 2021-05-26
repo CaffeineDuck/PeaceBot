@@ -76,11 +76,22 @@ class PeaceBot(commands.Bot):
             self.load_extension("jishaku")
 
         # Started the status chaning cycle
-        self._statuses = cycle([
-            lambda: discord.Activity(type=discord.ActivityType.watching, name=f'{self.prefix}help | Use {self.prefix}invite to invite me 👀'),
-            lambda: discord.Activity(type=discord.ActivityType.listening, name=f'{len(self.commands)} Commands | {len(self.users)} Users | {len(self.guilds)} Servers'),
-            lambda: discord.Activity(type=discord.ActivityType.watching, name=f"My updates | Use {self.prefix}source to see the source 😏"),
-        ])
+        self._statuses = cycle(
+            [
+                lambda: discord.Activity(
+                    type=discord.ActivityType.watching,
+                    name=f"{self.prefix}help | Use {self.prefix}invite to invite me 👀",
+                ),
+                lambda: discord.Activity(
+                    type=discord.ActivityType.listening,
+                    name=f"{len(self.commands)} Commands | {len(self.users)} Users | {len(self.guilds)} Servers",
+                ),
+                lambda: discord.Activity(
+                    type=discord.ActivityType.watching,
+                    name=f"My updates | Use {self.prefix}source to see the source 😏",
+                ),
+            ]
+        )
         self.change_status.start()
 
     async def cache_guild_prefix(self, message: Message) -> None:
@@ -109,12 +120,10 @@ class PeaceBot(commands.Bot):
     async def change_status(self):
         new_activity = next(self._statuses)
         await self.change_presence(status=discord.Status.idle, activity=new_activity())
-       
 
     @change_status.before_loop
     async def before_change_status(self):
         await self.wait_until_ready()
-        
 
     @tasks.loop(seconds=1)
     async def cog_watcher_task(self) -> None:
@@ -155,7 +164,7 @@ class PeaceBot(commands.Bot):
     async def on_message(self, message: Message):
         if not message.guild:
             await self.process_commands(message)
-            
+
         user = self.users_cache.get(message.author.id)
         guild = self.guilds_cache.get(message.guild.id)
 
