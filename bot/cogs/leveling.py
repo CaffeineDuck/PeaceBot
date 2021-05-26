@@ -1,4 +1,6 @@
 import asyncio
+from bot.bot import PeaceBot
+from bot.utils.leveling_handler import LevelingHandler, UserRank
 import random
 import re
 from typing import List, Optional
@@ -13,16 +15,12 @@ from models import GuildModel, LevelingUserModel
 
 
 class Leveling(BetterCog):
-    def __init__(self, bot):
+    def __init__(self, bot: PeaceBot):
         super().__init__(bot)
         self._cd = commands.CooldownMapping.from_cooldown(
             1, 60, commands.BucketType.member
         )
-        self.bulk_update_db.start()
-        self.users_leveling_cache = LRUCache(1000)
-
-        # This cache is for cross-checking the user models for reducing db queries
-        self.users_leveling_cache_updated = LRUCache(1000)
+        self.leveling_handler = LevelingHandler(self.bot)
 
     def get_ratelimit(self, message: discord.Message) -> Optional[int]:
         """Returns the ratelimit left"""
@@ -34,94 +32,23 @@ class Leveling(BetterCog):
         ratelimit = self.get_ratelimit(message)
         if ratelimit or message.author.bot or not message.guild:
             return
+        await self.leveling_handler.handle_user_message(message)
 
-        leveling_user = self.users_leveling_cache.get(
-            (message.guild.id, message.author.id)
+    @commands.Cog.listener()
+    async def on_user_level_up(
+        self, user_model: LevelingUserModel, message: discord.Message
+    ):
+        guild: discord.Guild = self.bot.get_guild(message.guild.id)
+        member = guild.get_member(message.author.id)
+        await message.channel.send(
+            f"GG {member.mention} has advanced to **Level {user_model.level}**"
         )
-
-        guild_model, user_model = await self.get_user_guild_cache(message)
-
-        if not guild_model or not user_model:
-            print(
-                f"[AGAIN] MODELS NOT FOUND FOR {message.author}, GUILDMODEL: {guild_model}, USERMODEL: {user_model}"
-            )
-            return
-
-        if not leveling_user:
-            leveling_user, is_new = await LevelingUserModel.get_or_create(
-                user=user_model, guild=guild_model
-            )
-            if is_new:
-                await guild_model.xp_members.add(leveling_user)
-
-        user_leveling_model = await self.give_user_xp(leveling_user, guild_model)
-
-        self.users_leveling_cache[
-            (message.guild.id, message.author.id)
-        ] = user_leveling_model
-
-    async def give_user_xp(self, user: LevelingUserModel, guild: GuildModel):
-        user.xp += random.randint(15, 25) * guild.xp_multiplier
-        user.level = await self.get_level(user)
-        return user
-
-    async def get_user_guild_cache(self, message: discord.Message):
-        guild_model = self.bot.guilds_cache.get(message.guild.id)
-        user_model = self.bot.users_cache.get(message.author.id)
-
-        if not guild_model or not user_model:
-            print(
-                f"MODELS NOT FOUND FOR {message.author}, GUILDMODEL: {guild_model}, USERMODEL: {user_model}"
-            )
-            await asyncio.sleep(2)
-            guild_model, user_model = await self.get_user_guild_cache(message)
-
-        return guild_model, user_model
-
-    async def get_level(self, user: LevelingUserModel):
-        while True:
-            if user.xp < ((50 * (user.level ** 2)) + (50 * user.level)):
-                break
-            user.level += 1
-        return user.level
-
-    @tasks.loop(minutes=1)
-    async def bulk_update_db(self):
-        leveling_models = self.users_leveling_cache.values()
-        bulk_update_tasks = [
-            self.save_leveling_model(model) for model in leveling_models
-        ]
-        await asyncio.gather(*bulk_update_tasks)
-
-    async def save_leveling_model(self, model: LevelingUserModel):
-        model_cache = self.users_leveling_cache_updated.get(
-            (model.guild_id, model.user_id)
-        )
-        if model == model_cache:
-            return
-
-        await model.save()
-        self.users_leveling_cache_updated[(model.guild_id, model.user_id)] = model
-
-    @bulk_update_db.before_loop
-    async def before_bulk_db_update(self):
-        await self.bot.wait_until_ready()
 
     @commands.cooldown(1, 5, BucketType.user)
     @commands.command()
     async def rank(self, ctx: commands.Context, member: Optional[discord.Member]):
         member = member or ctx.author
-        guild_model: GuildModel = self.bot.guilds_cache.get(ctx.guild.id)
-
-        leveling_user_models: List[
-            LevelingUserModel
-        ] = await guild_model.xp_members.all().order_by("xp")
-        leveling_user_models.reverse()
-
-        user_model = list(
-            filter(lambda model: model.user_id == member.id, leveling_user_models)
-        )[0]
-        index = leveling_user_models.index(user_model) + 1
+        user_rank: UserRank = await self.leveling_handler.get_user_rank(member)
 
         embed = discord.Embed(
             title=f"**{member}**'s Rank",
@@ -129,9 +56,9 @@ class Leveling(BetterCog):
             color=discord.Color(random.randint(0, 0xFFFFFF)),
             timestamp=ctx.message.created_at,
         )
-        embed.add_field(name="Position", value=f"#{index}")
-        embed.add_field(name="Level", value=user_model.level)
-        embed.add_field(name="XP", value=user_model.xp)
+        embed.add_field(name="Position", value=f"#{user_rank.position}")
+        embed.add_field(name="Level", value=user_rank.level)
+        embed.add_field(name="XP", value=f"{user_rank.xp}/{user_rank.required_xp}")
 
         await ctx.reply(embed=embed)
 
