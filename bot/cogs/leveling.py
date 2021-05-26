@@ -42,7 +42,7 @@ class Leveling(BetterCog):
 
         if not guild_model:
             # Sleeping for 2 sec so that cache can be created if not there!
-            await asyncio.sleep(2)
+            await asyncio.sleep(10)
             guild_model = self.bot.guilds_cache.get(message.guild.id)
 
         if not leveling_user:
