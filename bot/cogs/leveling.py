@@ -1,9 +1,10 @@
 import asyncio
 import random
+import re
 from typing import List, Optional
-from cachetools import LRUCache
 
 import discord
+from cachetools import LRUCache
 from discord.ext import commands, tasks
 from discord.ext.commands import BucketType
 
@@ -38,15 +39,12 @@ class Leveling(BetterCog):
             (message.guild.id, message.author.id)
         )
 
-        guild_model = self.bot.guilds_cache.get(message.guild.id)
-
-        if not guild_model:
-            # Sleeping for 2 sec so that cache can be created if not there!
-            await asyncio.sleep(10)
-            guild_model = self.bot.guilds_cache.get(message.guild.id)
+        guild_model, _ = await self.get_user_guild_cache(message)
 
         if not leveling_user:
-            leveling_user, is_new = await LevelingUserModel.get_or_create(user__id = message.author.id, guild__id = message.guild.id)
+            leveling_user, is_new = await LevelingUserModel.get_or_create(
+                user__id=message.author.id, guild__id=message.guild.id
+            )
             if is_new:
                 await guild_model.xp_members.add(leveling_user)
 
@@ -60,6 +58,16 @@ class Leveling(BetterCog):
         user.xp += random.randint(15, 25) * guild.xp_multiplier
         user.level = await self.get_level(user)
         return user
+
+    async def get_user_guild_cache(self, message: discord.Message):
+        guild_model = self.bot.guilds_cache.get(message.guild.id)
+        user_model = self.bot.users_cache.get(message.author.id)
+
+        if not guild_model or user_model:
+            await asyncio.sleep(2)
+            self.get_user_guild_cache(message)
+
+        return guild_model, user_model
 
     async def get_level(self, user: LevelingUserModel):
         while True:
@@ -90,17 +98,21 @@ class Leveling(BetterCog):
     async def before_bulk_db_update(self):
         await self.bot.wait_until_ready()
 
-    @commands.cooldown(1,5, BucketType.user)
+    @commands.cooldown(1, 5, BucketType.user)
     @commands.command()
     async def rank(self, ctx: commands.Context, member: Optional[discord.Member]):
         member = member or ctx.author
         guild_model: GuildModel = self.bot.guilds_cache.get(ctx.guild.id)
 
-        leveling_user_models: List[LevelingUserModel] = await guild_model.xp_members.all().order_by('xp')
+        leveling_user_models: List[
+            LevelingUserModel
+        ] = await guild_model.xp_members.all().order_by("xp")
         leveling_user_models.reverse()
 
-        user_model = list(filter(lambda model: model.user_id == member.id, leveling_user_models))[0]
-        index = (leveling_user_models.index(user_model) + 1)
+        user_model = list(
+            filter(lambda model: model.user_id == member.id, leveling_user_models)
+        )[0]
+        index = leveling_user_models.index(user_model) + 1
 
         embed = discord.Embed(
             title=f"**{member}**'s Rank",
@@ -108,12 +120,11 @@ class Leveling(BetterCog):
             color=discord.Color(random.randint(0, 0xFFFFFF)),
             timestamp=ctx.message.created_at,
         )
-        embed.add_field(name='Position', value=f'#{index}')
-        embed.add_field(name='Level', value=user_model.level)
-        embed.add_field(name='XP', value=user_model.xp)
+        embed.add_field(name="Position", value=f"#{index}")
+        embed.add_field(name="Level", value=user_model.level)
+        embed.add_field(name="XP", value=user_model.xp)
 
         await ctx.reply(embed=embed)
-
 
 
 def setup(bot):
