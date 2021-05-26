@@ -13,6 +13,8 @@ class PersonalGuild(BetterCog):
     """
 
     def cog_check(self, ctx: commands.Context):
+        if not ctx.guild:
+            return True
         if not ctx.guild.id in personal_guild.ids:
             raise NotPersonalGuild()
         return True

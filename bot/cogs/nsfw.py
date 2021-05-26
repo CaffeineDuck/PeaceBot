@@ -23,6 +23,8 @@ class NSFW(BetterCog):
         super().__init__(bot)
 
     def cog_help_check(self, ctx: commands.Context):
+        if not ctx.guild:
+            return True
         if ctx.channel.is_nsfw():
             return True
         return False

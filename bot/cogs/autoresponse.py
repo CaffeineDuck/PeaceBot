@@ -50,6 +50,9 @@ class AutoResponses(BetterCog):
 
     @commands.Cog.listener()
     async def on_message(self, msg: discord.Message):
+        if not msg.guild:
+            return
+
         autoresponse_handler = AutoResponseHandler(
             self.bot, msg, self.autoresponse_cache
         )

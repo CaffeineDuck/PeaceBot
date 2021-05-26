@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import traceback
 from typing import List
 from asyncio import sleep
@@ -152,6 +153,9 @@ class PeaceBot(commands.Bot):
                 traceback.print_exception(type(e), e, e.__traceback__)
 
     async def on_message(self, message: Message):
+        if not message.guild:
+            await self.process_commands(message)
+            
         user = self.users_cache.get(message.author.id)
         guild = self.guilds_cache.get(message.guild.id)
 
@@ -173,6 +177,9 @@ class PeaceBot(commands.Bot):
 
     # TODO: Add permission/ role check!
     async def check(self, ctx: commands.Context):
+        if not ctx.guild:
+            return True
+
         commands = self.commands_cache.get(ctx.guild.id)
 
         if not commands:
