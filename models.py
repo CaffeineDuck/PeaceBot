@@ -20,9 +20,6 @@ class GuildModel(Model):
     xp_role_rewards = fields.JSONField(
         description="Role Rewards Level -> Role Mapping", null=True
     )
-    xp_members: fields.ManyToManyRelation["LevelingUserModel"] = fields.ManyToManyField(
-        "main.LevelingUserModel", related_name="LevelingUserModel"
-    )
 
     @classmethod
     async def from_id(cls, guild_id: int):
