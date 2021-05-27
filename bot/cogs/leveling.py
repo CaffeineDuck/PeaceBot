@@ -58,7 +58,9 @@ class Leveling(BetterCog):
         )
         embed.add_field(name="Position", value=f"#{user_rank.position}", inline=False)
         embed.add_field(name="Level", value=user_rank.level, inline=False)
-        embed.add_field(name="XP", value=f"{user_rank.xp}/{user_rank.required_xp}", inline=False)
+        embed.add_field(
+            name="XP", value=f"{user_rank.xp}/{user_rank.required_xp}", inline=False
+        )
         embed.add_field(name="Messages Sent", value=user_rank.messages, inline=False)
 
         await ctx.reply(embed=embed)
@@ -72,6 +74,29 @@ class Leveling(BetterCog):
         async with ctx.typing():
             await self.leveling_handler.import_from_mee6(ctx.guild.id)
             await ctx.reply("**Mee6 Data has been imported!**")
+
+    @commands.command(aliases=["lb"])
+    async def leaderboard(self, ctx: commands.Context):
+        guild_model = self.bot.guilds_cache.get(ctx.guild.id)
+        user_models = (
+            await LevelingUserModel.filter(guild=guild_model)
+            .order_by("-xp")
+            .prefetch_related("user")
+            .limit(10)
+        )
+        ranks = "\n".join(
+            [
+                f"**{i+1}.** {ctx.guild.get_member(model.user.id)}"
+                for (i, model) in enumerate(user_models)    
+            ]
+        )
+        ranks_embed = discord.Embed(
+            title="LeaderBoard",
+            description=ranks,
+            color=discord.Color(random.randint(0, 0xFFFFFF)),
+            timestamp=ctx.message.created_at,
+        )
+        await ctx.reply(embed=ranks_embed)
 
 
 def setup(bot):

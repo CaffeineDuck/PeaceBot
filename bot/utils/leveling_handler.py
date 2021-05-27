@@ -1,5 +1,6 @@
 import asyncio
 from dataclasses import dataclass
+from functools import cache
 from itertools import islice
 import random
 import re
@@ -90,18 +91,17 @@ class LevelingHandler:
             user_model = await self.get_user(user_id)
             guild_model = await self.get_guild(guild_id)
 
-            leveling_user_model, is_new = await LevelingUserModel.get_or_create(
+            leveling_user_model, _ = await LevelingUserModel.get_or_create(
                 user=user_model, guild=guild_model
             )
-            if is_new:
-                await guild_model.xp_members.add(user_model)
 
         return leveling_user_model
 
     def required_xp_for_level(self, level: int) -> int:
         return (50 * (level ** 2)) + (100 * level)
 
-    def dispatch_level_up_event(self, user: LevelingUserModel) -> None:
+    async def level_up_handler(self, user: LevelingUserModel) -> None:
+        await user.save()
         self._bot.dispatch("user_level_up", user, self._message)
 
     def update_leveling_cache(self, model: LevelingUserModel) -> None:
@@ -112,7 +112,7 @@ class LevelingHandler:
             if user_model.xp < self.required_xp_for_level(user_model.level):
                 break
             user_model.level += 1
-            self.dispatch_level_up_event(user_model)
+            await self.level_up_handler(user_model)
         return user_model.level
 
     async def get_user_level_from_xp(self, xp: int) -> int:
@@ -146,9 +146,9 @@ class LevelingHandler:
     async def get_user_rank(self, member: discord.Member) -> UserRank:
         guild_model = await self.get_guild(member.guild.id)
 
-        leveling_user_models: List[
-            LevelingUserModel
-        ] = await guild_model.xp_members.all().order_by("xp")
+        leveling_user_models: List[LevelingUserModel] = await LevelingUserModel.filter(
+            guild=guild_model
+        ).order_by("xp")
         leveling_user_models.reverse()
 
         try:
