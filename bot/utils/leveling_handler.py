@@ -8,7 +8,7 @@ from typing import List, Mapping, Tuple
 import aiohttp
 
 import discord
-from cachetools import LRUCache
+from cachetools import LRUCache, TTLCache
 from discord.ext import commands, tasks
 
 from bot.bot import PeaceBot
@@ -103,6 +103,7 @@ class LevelingHandler:
     async def level_up_handler(self, user: LevelingUserModel) -> None:
         await user.save()
         self._bot.dispatch("user_level_up", user, self._message)
+        self._user_cache[(user.guild_id, user.user_id)] = user
 
     def update_leveling_cache(self, model: LevelingUserModel) -> None:
         self._user_cache[(model.guild_id, model.user_id)] = model
@@ -196,6 +197,7 @@ class LevelingHandler:
         user.level = user_level
 
         asyncio.create_task(self.save_in_db(user))
+        self._user_cache[(user.guild_id, user.user_id)] = user
         self._user_check_cache[(user.guild_id, user.user_id)] = user
 
     @tasks.loop(minutes=1)
