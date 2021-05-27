@@ -112,7 +112,7 @@ class Config(BetterCog):
 
         valid_channels = ctx.guild.text_channels if channel == "all" else [ctx.channel]
 
-        guild = await GuildModel.get(id=ctx.guild.id)
+        guild = self.bot.guilds_cache.get(ctx.guild.id)
 
         for text_channel in valid_channels:
             record, _ = await CommandModel.get_or_create(
