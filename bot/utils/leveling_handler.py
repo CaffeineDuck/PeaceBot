@@ -1,18 +1,15 @@
 import asyncio
-from dataclasses import dataclass
-from functools import cache
-from itertools import islice
 import random
-import re
+from dataclasses import dataclass
 from typing import List, Mapping, Tuple
-import aiohttp
 
+import aiohttp
 import discord
-from cachetools import LRUCache, TTLCache
+from cachetools import LRUCache
 from discord.ext import commands, tasks
 
 from bot.bot import PeaceBot
-from models import GuildModel, LevelingUserModel, UserModel
+from models import CommandModel, GuildModel, LevelingUserModel, UserModel
 
 
 @dataclass
@@ -68,7 +65,7 @@ class LevelingHandler:
             guild_model = self._bot.guilds_cache.get(guild_id)
 
             if not guild_model:
-                guild_model = GuildModel.get(id=guild_id)
+                guild_model = await GuildModel.get(id=guild_id)
 
         return guild_model
 
@@ -132,7 +129,23 @@ class LevelingHandler:
         user.messages += 1
         return user
 
+    async def checks(self, message: discord.Message) -> bool:
+        commands_cache = await self._bot.get_commands_cache(message.guild.id)
+        check = (
+            lambda model: model.name == "leveling-system"
+            and not model.enabled
+            and (model.channel == "all" or model.channel == message.channel.id)
+        )
+        valid = [model for model in commands_cache if check(model)]
+
+        if valid:
+            return False
+        return True
+
     async def handle_user_message(self, message: discord.Message) -> None:
+        if not await self.checks(message):
+            return
+
         # Setting the message as it is used all over the class
         self._message = message
 
@@ -187,6 +200,28 @@ class LevelingHandler:
             for member in data.get("players")
         ]
         await asyncio.gather(*members)
+
+    async def leveling_toggle_handler(
+        self, channels: List[discord.TextChannel], ctx: commands.Context, toggle: bool
+    ):
+        guild_model = self.bot.guilds_cache.get(ctx.guild.id)
+
+        async def save_leveling_togle(channel):
+            record, _ = await CommandModel.get_or_create(
+                guild=guild_model,
+                name="leveling-system",
+                channel=channel.id,
+            )
+            record.enabled = toggle
+            await record.save()
+
+        tasks = [save_leveling_togle(channel) for channel in channels]
+        asyncio.gather(*tasks)
+
+        channels_str = ", ".join([channel.mention for channel in channels])
+        toggle_str = "enabled" if toggle else "disabled"
+
+        await ctx.reply(f"Leveling has been {toggle_str} for channel {channels_str}")
 
     async def update_db_from_other(self, guild_id: int, member: dict) -> None:
         user = await self.get_leveling_user(guild_id, member.get("id"))

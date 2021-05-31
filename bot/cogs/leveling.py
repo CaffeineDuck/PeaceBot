@@ -1,17 +1,14 @@
-import asyncio
 from bot.bot import PeaceBot
 from bot.utils.leveling_handler import LevelingHandler, UserRank
 import random
-import re
-from typing import List, Optional
+from typing import Optional
 
 import discord
-from cachetools import LRUCache
-from discord.ext import commands, tasks
-from discord.ext.commands import BucketType
+from discord.ext import commands
+from discord.ext.commands import BucketType, Greedy
 
 from bot.utils.mixins.better_cog import BetterCog
-from models import GuildModel, LevelingUserModel
+from models import LevelingUserModel
 
 
 class Leveling(BetterCog):
@@ -87,7 +84,7 @@ class Leveling(BetterCog):
         ranks = "\n".join(
             [
                 f"**{i+1}.** {ctx.guild.get_member(model.user.id)}"
-                for (i, model) in enumerate(user_models)    
+                for (i, model) in enumerate(user_models)
             ]
         )
         ranks_embed = discord.Embed(
@@ -97,6 +94,24 @@ class Leveling(BetterCog):
             timestamp=ctx.message.created_at,
         )
         await ctx.reply(embed=ranks_embed)
+
+    @commands.group("lvlcfg", invoke_without_command=True)
+    async def leveling_config(self, ctx: commands.Context):
+        await ctx.send_help(ctx.command)
+
+    @leveling_config.command(name="enable")
+    async def leveling_enable(
+        self, ctx: commands.Context, channels: Greedy[discord.TextChannel] = None
+    ):
+        channels = channels or [ctx.channel]
+        await self.leveling_handler.leveling_toggle_handler(channels, ctx, True)
+
+    @leveling_config.command(name="disable")
+    async def leveling_disable(
+        self, ctx: commands.Context, channels: Greedy[discord.TextChannel] = None
+    ):
+        channels = channels or [ctx.channel]
+        await self.leveling_handler.leveling_toggle_handler(channels, ctx, False)
 
 
 def setup(bot):

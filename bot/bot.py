@@ -1,8 +1,6 @@
 import logging
 import os
-import re
 import traceback
-from asyncio import sleep
 from itertools import cycle
 from typing import List
 
@@ -184,16 +182,38 @@ class PeaceBot(commands.Bot):
     async def on_guild_join(self, guild: discord.Guild):
         await GuildModel.get_or_create(id=guild.id).prefetch("GuildModel", "UserModel")
 
+    async def get_commands_cache(self, guild_id: int) -> List[CommandModel]:
+        commands_cache = self.commands_cache.get(guild_id)
+
+        if not commands_cache:
+            commands_cache = await CommandModel.filter(guild__id=guild_id)
+            self.commands_cache[guild_id] = commands_cache
+
+        return commands_cache
+
+    async def get_guild_model(self, guild_id: int):
+        guild_model = self.guilds_cache.get(guild_id)
+
+        if not guild_model:
+            guild_model = await GuildModel.get(id=guild_id)
+
+        return guild_model
+
+    async def get_user_model(self, user_id: int):
+        user_model = self.users_cache.get(user_id)
+
+        if not user_model:
+            user_model = await UserModel.get(id=user_id)
+            self.users_cache[user_id] = user_model
+
+        return user_model
+        
     # TODO: Add permission/ role check!
     async def check(self, ctx: commands.Context):
         if not ctx.guild:
             return True
 
-        commands = self.commands_cache.get(ctx.guild.id)
-
-        if not commands:
-            commands = await CommandModel.filter(guild__id=ctx.guild.id)
-            self.commands_cache[ctx.guild.id] = commands
+        commands_cache = await self.get_commands_cache(ctx.guild.id)
 
         defualt_check = (
             lambda ctx, command: not command.enabled
@@ -211,7 +231,7 @@ class PeaceBot(commands.Bot):
 
         current_command = [
             command.name
-            for command in commands
+            for command in commands_cache
             if defualt_check(ctx, command)
             and (command_check(ctx, command) or cog_check(ctx, command))
         ]
