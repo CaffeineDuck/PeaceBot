@@ -1,4 +1,5 @@
 import asyncio
+from bot.bot import PeaceBot
 import random
 from typing import Union
 
@@ -7,6 +8,7 @@ from akinator.async_aki import Akinator
 from discord import Color, Embed, Member, Message
 from discord.ext import commands
 from discord.ext.commands import BucketType, Context
+from nepse import Client
 
 from bot.utils.mixins.better_cog import BetterCog
 
@@ -39,6 +41,38 @@ class AkiError(commands.CommandError):
 
 
 class Misc(BetterCog):
+    def __init__(self, bot: PeaceBot):
+        super().__init__(bot)
+        self._share_client = Client()
+
+    @commands.command()
+    async def nepse(self, ctx: commands.Context, symbol: str):
+        symbol = symbol.upper()
+        response = await self._share_client.get_company(symbol=symbol)
+        daily_trade = response.daily_trade
+        
+        embed = discord.Embed(
+            title=f"NEPSE Data for {response.security.company.name}",
+            color=discord.Color(random.randint(0, 0xFFFFFF)),
+        )
+        embed.set_thumbnail(
+            url="https://images-ext-2.discordapp.net/external/ciTNJpWs61J0Ur_U5DQHFSpJ8DsvgPGjfbsedMtSkyc/https/images-ext-2.discordapp.net/external/rxvZr7oPFnT1PYp5DHluOA9a1F2d-wiUD-SgZ2LknZ8/https/cdn6.aptoide.com/imgs/a/8/4/a8435b6d8d3424dbc79a4ad52f976ad7_icon.png"
+        )
+        embed.add_field(name="Open Price", value=daily_trade.open_price, inline=False)
+        embed.add_field(
+            name="Highest Price", value=daily_trade.high_price, inline=False
+        )
+        embed.add_field(name="Lowest Price", value=daily_trade.low_price, inline=False)
+        embed.add_field(
+            name="Closing Price", value=daily_trade.close_price, inline=False
+        )
+        embed.add_field(
+            name="Last Updated Price", value=daily_trade.last_traded_price, inline=False
+        )
+
+        embed.set_footer(text=f"Business Date: {daily_trade.business_date}")
+        await ctx.reply(embed=embed)
+
     @commands.command(name="httpcat", aliases=["hcat"])
     async def httpcat(self, ctx, code: Union[int, str] = None):
         """Get a HTTP Cat for a HTTP error code"""
