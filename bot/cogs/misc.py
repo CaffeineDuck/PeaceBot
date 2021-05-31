@@ -49,10 +49,10 @@ class Misc(BetterCog):
     async def nepse(self, ctx: commands.Context, symbol: str):
         symbol = symbol.upper()
         response = await self._share_client.get_company(symbol=symbol)
-        daily_trade = response.daily_trade
+        daily_trade = response.security_daily_trade_dto
         
         embed = discord.Embed(
-            title=f"NEPSE Data for {response.security.company.name}",
+            title=f"NEPSE Data for {response.security.security_name}",
             color=discord.Color(random.randint(0, 0xFFFFFF)),
         )
         embed.set_thumbnail(

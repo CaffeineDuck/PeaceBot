@@ -23,6 +23,7 @@ asyncpg = "*"
 pypika = "*"
 pillow = "*"
 nepse-api = "*"
+httpx = "*"
 
 [dev-packages]
 rope = "*"
