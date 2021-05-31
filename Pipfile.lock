@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "be986a15b7f6564fe87f3472c46e4b1b1294a920f514074039880b589b55f8e4"
+            "sha256": "81fc2b38f400613a85dab4983c4487d8fa5de528615554134c70dcc11d407eec"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -294,7 +294,7 @@
                 "sha256:0a2651dd2b9d7662c70d12ada5c290abcf57373b9633515fe4baa9f62566086f",
                 "sha256:ad2e3db847be736edc4b272c4d5788790a7e5789ef132fc6b5fef8aeb9e9f6e0"
             ],
-            "index": "pypi",
+            "markers": "python_version >= '3.6'",
             "version": "==0.18.1"
         },
         "humanize": {
@@ -384,7 +384,9 @@
         },
         "nepse-api": {
             "hashes": [
+                "sha256:0bb66d1dc5aa0224277f9e8ffb92e1bab4e93e798b2fd72714b0aead5067b49f",
                 "sha256:5f43b72243c1e2075a05c4211cc094bc4a6dcc13e2377e44c3607ac1d6e06e30",
+                "sha256:65d49b02da5dfcb7cfeeb3ee60775c321a7ba9fa90fc52b7ec093cc0ee487684",
                 "sha256:f03a285e57f11b0d2d9d8cacbbc31b141d55947ae0729b0caf2b91162d2d98f7"
             ],
             "index": "pypi",
