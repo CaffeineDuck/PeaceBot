@@ -35,6 +35,9 @@ class Leveling(BetterCog):
     async def on_user_level_up(
         self, user_model: LevelingUserModel, message: discord.Message
     ):
+        if user_model.level == 1:
+            return
+            
         guild: discord.Guild = self.bot.get_guild(message.guild.id)
         member = guild.get_member(message.author.id)
         await message.channel.send(
