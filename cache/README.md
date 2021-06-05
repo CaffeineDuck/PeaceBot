@@ -1,1 +1,0 @@
-This dir contains all the dynamically generated cache files!
