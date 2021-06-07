@@ -42,8 +42,8 @@ class LevelingHandler:
 
         # This cache is for cross-checking the user models for reducing db queries
         # Using this cache checking takes double the memory but reduces processing
-        self._user_check_cache: Mapping[
-            Tuple[discord.Guild.id, discord.Member.id], LevelingUserModel
+        self._user_check_cache_xp: Mapping[
+            Tuple[discord.Guild.id, discord.Member.id], int
         ] = LRUCache(1000)
 
         # Starts bulk updating the db from cache
@@ -268,7 +268,6 @@ class LevelingHandler:
         if not roles:
             return
 
-        print(*roles)
         await user.add_roles(*roles, reason=f"Level up to level {user_model.level}")
 
     async def update_db_from_other(self, guild_id: int, member: dict) -> None:
@@ -282,7 +281,7 @@ class LevelingHandler:
         asyncio.create_task(self.save_in_db(user))
 
         self._user_cache[(user.guild_id, user.user_id)] = user
-        self._user_check_cache[(user.guild_id, user.user_id)] = user
+        self._user_check_cache_xp[(user.guild_id, user.user_id)] = user.xp
         return user
 
     @tasks.loop(minutes=1)
@@ -298,11 +297,11 @@ class LevelingHandler:
         await self._bot.wait_until_ready()
 
     async def save_leveling_models(self, model: LevelingUserModel) -> None:
-        check_cache = self._user_check_cache.get((model.guild_id, model.user_id))
-        if model == check_cache:
+        check_cache_xp = self._user_check_cache_xp.get((model.guild_id, model.user_id))
+        if model.xp == check_cache_xp:
             return
         asyncio.create_task(self.save_in_db(model))
-        self._user_check_cache[(model.guild_id, model.user_id)] = model
+        self._user_check_cache_xp[(model.guild_id, model.user_id)] = model.xp
 
     async def save_in_db(self, model: LevelingUserModel) -> None:
         await model.save()
