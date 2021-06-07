@@ -99,7 +99,9 @@ class LevelingHandler:
 
     async def level_up_handler(self, user: LevelingUserModel) -> None:
         await user.save()
-        self._bot.dispatch("user_level_up", user, self._message)
+        await self.role_rewards_handler(user)
+
+        self._bot.dispatch("user_level_up", user)
         self._user_cache[(user.guild_id, user.user_id)] = user
 
     def update_leveling_cache(self, model: LevelingUserModel) -> None:
@@ -125,8 +127,12 @@ class LevelingHandler:
         self, user: LevelingUserModel, guild: GuildModel
     ) -> LevelingUserModel:
         user.xp += random.randint(15, 25) * guild.xp_multiplier
-        user.level = await self.get_user_level(user)
         user.messages += 1
+
+        # Updates the user level and triggers level
+        # event as well if needed
+        user.level = await self.get_user_level(user)
+
         return user
 
     async def checks(self, message: discord.Message) -> bool:
@@ -154,6 +160,9 @@ class LevelingHandler:
         leveling_user_model = await self.get_leveling_user(
             guild_model.id, user_model.id
         )
+        # Setting defualt channel so that message can be sent there
+        leveling_user_model.defualt_rank_channel = message.channel.id
+
         updated_user = await self.update_user(leveling_user_model, guild_model)
         self.update_leveling_cache(updated_user)
 
@@ -173,14 +182,19 @@ class LevelingHandler:
             raise UserNotRanked()
 
         index = leveling_user_models.index(user_model) + 1
+
+        prev_level_xp = self.required_xp_for_level(user_model.level - 1)
         new_level_xp = self.required_xp_for_level(user_model.level)
+
+        required_xp = new_level_xp - prev_level_xp
+        current_xp = user_model.xp - prev_level_xp
 
         user_rank = UserRank(
             member.id,
-            user_model.xp,
+            current_xp,
             index,
             user_model.level,
-            new_level_xp,
+            required_xp,
             user_model.messages,
             guild_model,
         )
@@ -222,6 +236,19 @@ class LevelingHandler:
         toggle_str = "enabled" if toggle else "disabled"
 
         await ctx.reply(f"Leveling has been {toggle_str} for channel {channels_str}")
+
+    async def role_rewards_handler(self, user_model: LevelingUserModel):
+        guild: discord.Guild = self._bot.get_guild(user_model.guild.id)
+        user: discord.Member = guild.get_member(user_model.user_id)
+
+        guild_model = await self._bot.get_guild_model(user_model.guild_id)
+
+        role = guild.get_role(guild_model.xp_role_rewards.get(str(user_model.level)))
+
+        if not role:
+            return
+
+        await user.add_roles(role, reason=f"Level up to level {user_model.level}")
 
     async def update_db_from_other(self, guild_id: int, member: dict) -> None:
         user = await self.get_leveling_user(guild_id, member.get("id"))

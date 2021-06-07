@@ -11,6 +11,10 @@ from bot.utils.mixins.better_cog import BetterCog
 from models import LevelingUserModel
 
 
+class LevelingError(commands.CommandError):
+    pass
+
+
 class Leveling(BetterCog):
     def __init__(self, bot: PeaceBot):
         super().__init__(bot)
@@ -32,15 +36,15 @@ class Leveling(BetterCog):
         await self.leveling_handler.handle_user_message(message)
 
     @commands.Cog.listener()
-    async def on_user_level_up(
-        self, user_model: LevelingUserModel, message: discord.Message
-    ):
+    async def on_user_level_up(self, user_model: LevelingUserModel):
         if user_model.level == 1:
             return
-            
-        guild: discord.Guild = self.bot.get_guild(message.guild.id)
-        member = guild.get_member(message.author.id)
-        await message.channel.send(
+
+        leveling_channel = self.bot.get_channel(user_model.defualt_rank_channel)
+        guild: discord.Guild = self.bot.get_guild(user_model.guild_id)
+        member = guild.get_member(user_model.user_id)
+
+        await leveling_channel.send(
             f"GG {member.mention} has advanced to **Level {user_model.level}**"
         )
 
@@ -75,7 +79,7 @@ class Leveling(BetterCog):
             await self.leveling_handler.import_from_mee6(ctx.guild.id)
             await ctx.reply("**Mee6 Data has been imported!**")
 
-    @commands.command(aliases=["lb"])
+    @commands.command(aliases=["lb", "top"])
     async def leaderboard(self, ctx: commands.Context):
         guild_model = self.bot.guilds_cache.get(ctx.guild.id)
         user_models = (
@@ -97,6 +101,65 @@ class Leveling(BetterCog):
             timestamp=ctx.message.created_at,
         )
         await ctx.reply(embed=ranks_embed)
+
+    @commands.has_permissions(manage_roles=True)
+    @commands.group(aliases=["rolerew"], invoke_without_command=True)
+    async def role_rewards(self, ctx: commands.Context):
+        await ctx.send_help(ctx.command)
+
+    @role_rewards.command(name="add")
+    async def add_role_rewards(
+        self, ctx: commands.Context, level: int, role: discord.Role
+    ):
+        guild_model = await self.bot.get_guild_model(ctx.guild.id)
+
+        old_role_rewards = guild_model.xp_role_rewards
+        if not old_role_rewards:
+            old_role_rewards = {}
+
+        new_role_rewards = old_role_rewards | {level: role.id}
+        guild_model.xp_role_rewards = new_role_rewards
+
+        await guild_model.save()
+        await ctx.reply(
+            f"**Added** role rewards for level {level} with role `{role.name}`"
+        )
+
+    @role_rewards.command(name="remove", aliases=["rm"])
+    async def remove_role_rewards(self, ctx: commands.Context, level: str):
+        guild_model = await self.bot.get_guild_model(ctx.guild.id)
+        role_rewards = guild_model.xp_role_rewards
+
+        if not role_rewards:
+            raise LevelingError("There are no role rewards setup!")
+
+        removed_role_id = role_rewards.pop(level)
+        removed_role = ctx.guild.get_role(removed_role_id)
+
+        guild_model.xp_role_rewards = role_rewards
+
+        await guild_model.save()
+        await ctx.reply(
+            f"**Removed** role rewards for level {level} with role `{removed_role.name}`"
+        )
+
+    @role_rewards.command(name="all")
+    async def list_role_rewards(self, ctx: commands.Context):
+        guild_model = await self.bot.get_guild_model(ctx.guild.id)
+
+        role_rewards_str = "\n".join(
+            [
+                f"`{level}` -> {(ctx.guild.get_role(role_id)).mention}"
+                for (level, role_id) in guild_model.xp_role_rewards.items()
+            ]
+        )
+
+        embed = discord.Embed(
+            title="Role Rewards",
+            description=role_rewards_str if role_rewards_str else 'No role rewards setup!',
+            color=discord.Color(random.randint(0, 0xFFFFFF)),
+        )
+        await ctx.reply(embed=embed)
 
     @commands.group("lvlcfg", invoke_without_command=True)
     async def leveling_config(self, ctx: commands.Context):
