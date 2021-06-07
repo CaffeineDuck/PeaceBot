@@ -1,13 +1,14 @@
 import asyncio
+
 from bot.bot import PeaceBot
 import random
 from typing import Union
 
 import discord
 from akinator.async_aki import Akinator
-from discord import Color, Embed, Member, Message
+from discord import Color, Embed, Message
 from discord.ext import commands
-from discord.ext.commands import BucketType, Context
+from discord.ext.commands import Context
 from nepse import Client
 
 from bot.utils.mixins.better_cog import BetterCog
@@ -43,34 +44,43 @@ class AkiError(commands.CommandError):
 class Misc(BetterCog):
     def __init__(self, bot: PeaceBot):
         super().__init__(bot)
-        self._share_client = Client()
+        self._share_client = Client(use_cache=True)
 
-    @commands.command()
-    async def nepse(self, ctx: commands.Context, symbol: str):
+    @commands.group(invoke_without_command=True)
+    async def nepse(self, ctx: commands.Context):
+        await ctx.send_help(ctx.command)
+
+    @nepse.command(name="checkipo", aliases=["ipo"])
+    async def nepse_check_ipo(self, ctx: commands.Context, scrip: str, boid: int):
+        scrip = scrip.upper()
+        result = await self._share_client.market_client.check_IPO(scrip, boid)
+        result_str = "Alloted" if result else "Not Alloted"
+        await ctx.reply(f"Your IPO has been {result_str} in {scrip}")
+
+    @nepse.command(name="company")
+    async def nepse_company(self, ctx: commands.Context, symbol: str):
         symbol = symbol.upper()
-        response = await self._share_client.get_company(symbol=symbol)
-        daily_trade = response.security_daily_trade_dto
-        
+        response = await self._share_client.security_client.get_company_live_price(
+            symbol=symbol
+        )
+
         embed = discord.Embed(
-            title=f"NEPSE Data for {response.security.security_name}",
+            title=f"NEPSE Data for {response.security_name}",
             color=discord.Color(random.randint(0, 0xFFFFFF)),
         )
         embed.set_thumbnail(
-            url="https://images-ext-2.discordapp.net/external/ciTNJpWs61J0Ur_U5DQHFSpJ8DsvgPGjfbsedMtSkyc/https/images-ext-2.discordapp.net/external/rxvZr7oPFnT1PYp5DHluOA9a1F2d-wiUD-SgZ2LknZ8/https/cdn6.aptoide.com/imgs/a/8/4/a8435b6d8d3424dbc79a4ad52f976ad7_icon.png"
+            url="https://cdn6.aptoide.com/imgs/a/8/4/a8435b6d8d3424dbc79a4ad52f976ad7_icon.png"
         )
-        embed.add_field(name="Open Price", value=daily_trade.open_price, inline=False)
+        embed.add_field(name="Open Price", value=response.open_price, inline=False)
+        embed.add_field(name="Highest Price", value=response.high_price, inline=False)
+        embed.add_field(name="Lowest Price", value=response.low_price, inline=False)
+        embed.add_field(name="Closing Price", value=response.close_price, inline=False)
         embed.add_field(
-            name="Highest Price", value=daily_trade.high_price, inline=False
+            name="Last Updated Price", value=response.last_updated_price, inline=False
         )
-        embed.add_field(name="Lowest Price", value=daily_trade.low_price, inline=False)
-        embed.add_field(
-            name="Closing Price", value=daily_trade.close_price, inline=False
-        )
-        embed.add_field(
-            name="Last Updated Price", value=daily_trade.last_traded_price, inline=False
-        )
+        embed.add_field(name="Total Trades", value=f"{response.total_trades}")
 
-        embed.set_footer(text=f"Business Date: {daily_trade.business_date}")
+        embed.set_footer(text=f"Business Date: {response.business_date}")
         await ctx.reply(embed=embed)
 
     @commands.command(name="httpcat", aliases=["hcat"])
