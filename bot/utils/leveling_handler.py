@@ -213,7 +213,8 @@ class LevelingHandler:
             self.update_db_from_other(guild_id, member)
             for member in data.get("players")
         ]
-        await asyncio.gather(*members)
+        data = await asyncio.gather(*members)
+        await asyncio.create_task(self.mee6_role_rewards_handler(data))
 
     async def leveling_toggle_handler(
         self, channels: List[discord.TextChannel], ctx: commands.Context, toggle: bool
@@ -237,18 +238,38 @@ class LevelingHandler:
 
         await ctx.reply(f"Leveling has been {toggle_str} for channel {channels_str}")
 
-    async def role_rewards_handler(self, user_model: LevelingUserModel):
-        guild: discord.Guild = self._bot.get_guild(user_model.guild.id)
-        user: discord.Member = guild.get_member(user_model.user_id)
+    async def mee6_role_rewards_handler(self, user_models: List[LevelingUserModel]):
+        for user in user_models:
+            asyncio.create_task(self.role_rewards_handler(user, mee6_import=True))
+
+    async def role_rewards_handler(
+        self, user_model: LevelingUserModel, mee6_import: bool = False
+    ):
+        guild: discord.Guild = self._bot.get_guild(user_model.guild_id)
+
+        try:
+            user: discord.Member = await guild.fetch_member(user_model.user_id)
+        except discord.HTTPException:
+            return
 
         guild_model = await self._bot.get_guild_model(user_model.guild_id)
 
-        role = guild.get_role(guild_model.xp_role_rewards.get(str(user_model.level)))
+        if mee6_import:
+            roles = [
+                guild.get_role(guild_model.xp_role_rewards.get(str(level)))
+                for level in guild_model.xp_role_rewards.keys()
+                if int(user_model.level) >= int(level)
+            ]
+        else:
+            roles = [
+                guild.get_role(guild_model.xp_role_rewards.get(str(user_model.level)))
+            ]
 
-        if not role:
+        if not roles:
             return
 
-        await user.add_roles(role, reason=f"Level up to level {user_model.level}")
+        print(*roles)
+        await user.add_roles(*roles, reason=f"Level up to level {user_model.level}")
 
     async def update_db_from_other(self, guild_id: int, member: dict) -> None:
         user = await self.get_leveling_user(guild_id, member.get("id"))
@@ -259,8 +280,10 @@ class LevelingHandler:
         user.level = user_level
 
         asyncio.create_task(self.save_in_db(user))
+
         self._user_cache[(user.guild_id, user.user_id)] = user
         self._user_check_cache[(user.guild_id, user.user_id)] = user
+        return user
 
     @tasks.loop(minutes=1)
     async def bulk_update_db(self) -> None:
