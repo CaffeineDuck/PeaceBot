@@ -21,8 +21,7 @@ discord-flags = "*"
 tortoise-orm = "*"
 asyncpg = "*"
 pypika = "*"
-pillow = "*"
-nepse-api = "*"
+nepse-api = "==1.1.5a0"
 
 [dev-packages]
 rope = "*"
