@@ -67,6 +67,7 @@ class PeaceBot(commands.Bot):
                     "bot.cogs.error",
                     "bot.cogs.prabhidhikaar",
                     "bot.cogs.leveling",
+                    "bot.cogs.image"
                 )
             )
 
@@ -238,6 +239,27 @@ class PeaceBot(commands.Bot):
         if current_command:
             raise CommandDisabled(ctx.command.name, ctx.cog.qualified_name)
         return True
+
+    async def get_or_fetch_member(self, guild: discord.Guild, member_id: int) -> discord.Member:
+
+        member = guild.get_member(member_id)
+        if member is not None:
+            return member
+
+        shard = self.get_shard(guild.shard_id)
+        if shard.is_ws_ratelimited():
+            try:
+                member = await guild.fetch_member(member_id)
+            except discord.HTTPException:
+                return None
+            else:
+                return member
+
+        members = await guild.query_members(limit=1, user_ids=[member_id], cache=True)
+        if not members:
+            return None
+        return members[0]
+
 
     async def on_ready(self):
         print(f"Logged in as {self.user.name}#{self.user.discriminator}")
