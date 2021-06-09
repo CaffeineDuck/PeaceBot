@@ -21,6 +21,7 @@ class UserRank:
     required_xp: int
     messages: int
     guild_model: GuildModel
+    image_banner: str
 
 
 class UserNotRanked(commands.CommandError):
@@ -189,6 +190,8 @@ class LevelingHandler:
         required_xp = new_level_xp - prev_level_xp
         current_xp = user_model.xp - prev_level_xp
 
+        image_banner = user_model.image_banner or guild_model.image_banner
+
         user_rank = UserRank(
             member.id,
             current_xp,
@@ -197,6 +200,7 @@ class LevelingHandler:
             required_xp,
             user_model.messages,
             guild_model,
+            image_banner,
         )
         return user_rank
 
@@ -241,6 +245,7 @@ class LevelingHandler:
     async def mee6_role_rewards_handler(self, user_models: List[LevelingUserModel]):
         for user in user_models:
             asyncio.create_task(self.role_rewards_handler(user, mee6_import=True))
+            await asyncio.sleep(0.1)
 
     async def role_rewards_handler(
         self, user_model: LevelingUserModel, mee6_import: bool = False
@@ -253,6 +258,9 @@ class LevelingHandler:
             return
 
         guild_model = await self._bot.get_guild_model(user_model.guild_id)
+
+        if user_model.level not in guild_model.xp_role_rewards.keys():
+            return
 
         if mee6_import:
             roles = [
