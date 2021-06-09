@@ -143,20 +143,23 @@ class Leveling(BetterCog):
             f"**Removed** role rewards for level {level} with role `{removed_role.name}`"
         )
 
-    @role_rewards.command(name="all")
+    @role_rewards.command(name="all", aliases=['list'])
     async def list_role_rewards(self, ctx: commands.Context):
         guild_model = await self.bot.get_guild_model(ctx.guild.id)
 
-        role_rewards_str = "\n".join(
-            [
-                f"`{level}` -> {(ctx.guild.get_role(role_id)).mention}"
-                for (level, role_id) in guild_model.xp_role_rewards.items()
-            ]
-        )
+        try:
+            role_rewards_str = "\n".join(
+                [
+                    f"`{level}` -> {(ctx.guild.get_role(role_id)).mention}"
+                    for (level, role_id) in guild_model.xp_role_rewards.items()
+                ]
+            )
+        except AttributeError:
+            role_rewards_str = 'No role rewards setup!'
 
         embed = discord.Embed(
             title="Role Rewards",
-            description=role_rewards_str if role_rewards_str else 'No role rewards setup!',
+            description=role_rewards_str,
             color=discord.Color(random.randint(0, 0xFFFFFF)),
         )
         await ctx.reply(embed=embed)
