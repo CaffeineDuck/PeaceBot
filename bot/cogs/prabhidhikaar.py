@@ -47,7 +47,7 @@ class Prabhidhikaar(BetterCog):
 
     @commands.command()
     @commands.has_any_role("Server Booster", "Kilo Chad 10+")
-    async def addbot(self, ctx, user: BotUser, *, reason: str):
+    async def addbot(self, ctx, user_id: BotUser, *, reason: str):
         """Requests your bot to be added to the server.
         To request your bot you must pass your bot's user ID and a reason
         You will get a DM regarding the status of your bot, so make sure you
@@ -87,8 +87,8 @@ class Prabhidhikaar(BetterCog):
         if not confirm:
             return await ctx.send("Aborting.")
 
-        url = f"https://discord.com/oauth2/authorize?client_id={user.id}&scope=bot&guild_id={ctx.guild.id}"
-        url2 = f"https://discord.com/oauth2/authorize?client_id={user.id}&scope=bot&guild_id={info.get('test-guild')}"
+        url = f"https://discord.com/oauth2/authorize?client_id={user_id.id}&scope=bot&guild_id={ctx.guild.id}"
+        url2 = f"https://discord.com/oauth2/authorize?client_id={user_id.id}&scope=bot&guild_id={info.get('test-guild')}"
 
         description = f"{reason}\n\n[Invite URL]({url})\n[Test Invite URL]({url2})"
         embed = discord.Embed(
@@ -99,12 +99,12 @@ class Prabhidhikaar(BetterCog):
         embed.add_field(
             name="Author", value=f"{ctx.author} (ID: {ctx.author.id})", inline=False
         )
-        embed.add_field(name="Bot", value=f"{user} (ID: {user.id})", inline=False)
+        embed.add_field(name="Bot", value=f"{user_id} (ID: {user_id.id})", inline=False)
         embed.timestamp = ctx.message.created_at
 
         # data for the bot to retrieve later
         embed.set_footer(text=ctx.author.id)
-        embed.set_author(name=user.id, icon_url=user.avatar_url_as(format="png"))
+        embed.set_author(name=user_id.id, icon_url=user_id.avatar_url_as(format="png"))
 
         channel = ctx.guild.get_channel(info["bot-entries"])
         try:
