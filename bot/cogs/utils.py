@@ -198,9 +198,9 @@ class Utils(BetterCog):
         periods or spaces.
         """
         github = '<:white_github:852245817175179284>'
-        embed = ctx.embed(title=f'{github} GitHub (Click Here) {github}')
+        embed = discord.Embed(title=f'{github} GitHub (Click Here) {github}')
         source_url = 'https://github.com/samrid-pandit/peacebot'
-        branch = 'main'
+        branch = 'master'
         if command is None:
             embed.url = source_url
             return await ctx.send(embed=embed)
@@ -212,7 +212,7 @@ class Utils(BetterCog):
         else:
             obj = self.bot.get_command(command.replace('.', ' '))
             if obj is None:
-                return await ctx.send(embed=ctx.error('Could not find command.'))
+                return await ctx.send(embed=commands.BadArgument('Could not find command.'))
 
             src = obj.callback.__code__
             module = obj.callback.__module__
