@@ -1,6 +1,4 @@
 import asyncio
-
-from bot.bot import PeaceBot
 import random
 from typing import Union
 
@@ -11,6 +9,7 @@ from discord.ext import commands
 from discord.ext.commands import Context
 from nepse import Client
 
+from bot.bot import PeaceBot
 from bot.utils.mixins.better_cog import BetterCog
 
 HTTP_ERROR_VALID_RANGES = (

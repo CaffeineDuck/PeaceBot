@@ -1,5 +1,3 @@
-from bot.bot import PeaceBot
-from bot.utils.leveling_handler import LevelingHandler, UserRank
 import random
 from typing import Optional
 
@@ -7,6 +5,8 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import BucketType, Greedy
 
+from bot.bot import PeaceBot
+from bot.utils.leveling_handler import LevelingHandler, UserRank
 from bot.utils.mixins.better_cog import BetterCog
 from models import LevelingUserModel
 

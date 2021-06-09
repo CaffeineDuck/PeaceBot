@@ -25,6 +25,7 @@ class BetterCog(commands.Cog):
         self.bot = bot
         self.hidden = cog_hidden
         self.error_msg = error_msg
+        super().__init__(*args, **kwargs)
 
     def help_check(self, ctx: commands.Context):
         if self.cog_help_check(ctx) == True:
