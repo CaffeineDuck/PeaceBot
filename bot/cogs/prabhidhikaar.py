@@ -46,7 +46,7 @@ class Prabhidhikaar(BetterCog):
         self.bot.remove_cog("LastToLeaveVc")
 
     @commands.command()
-    @commands.has_any_role(838316344311021588, 838294680776605737)
+    @commands.has_any_role("Server Booster", "Kilo Chad 10+")
     async def addbot(self, ctx, user: BotUser, *, reason: str):
         """Requests your bot to be added to the server.
         To request your bot you must pass your bot's user ID and a reason
