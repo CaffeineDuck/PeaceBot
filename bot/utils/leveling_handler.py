@@ -1,7 +1,7 @@
 import asyncio
 import random
 from dataclasses import dataclass
-from typing import List, Mapping, Tuple
+from typing import List, Mapping, Tuple, Union
 
 import aiohttp
 import discord
@@ -146,13 +146,16 @@ class LevelingHandler:
         valid = [model for model in commands_cache if check(model)]
 
         if valid:
+            print(f'INvalid: {message.author} -> "{message.content}"')
             return False
+        print(f'VALID: {message.author} -> "{message.content}"')
         return True
 
     async def handle_user_message(self, message: discord.Message) -> None:
         if not await self.checks(message):
             return
 
+        print(f'PASSED HOW???: {message.author} -> "{message.content}"')
         # Setting the message as it is used all over the class
         self._message = message
 
@@ -221,9 +224,13 @@ class LevelingHandler:
         await asyncio.create_task(self.mee6_role_rewards_handler(data))
 
     async def leveling_toggle_handler(
-        self, channels: List[discord.TextChannel], ctx: commands.Context, toggle: bool
+        self,
+        channels: Union[List[discord.TextChannel], str],
+        ctx: commands.Context,
+        toggle: bool,
     ):
-        guild_model = self.bot.guilds_cache.get(ctx.guild.id)
+        guild_model = self._bot.guilds_cache.get(ctx.guild.id)
+        _channels = ctx.guild.text_channels if isinstance(channels, str) else channels
 
         async def save_leveling_togle(channel):
             record, _ = await CommandModel.get_or_create(
@@ -234,10 +241,14 @@ class LevelingHandler:
             record.enabled = toggle
             await record.save()
 
-        tasks = [save_leveling_togle(channel) for channel in channels]
+        tasks = [save_leveling_togle(channel) for channel in _channels]
         asyncio.gather(*tasks)
 
-        channels_str = ", ".join([channel.mention for channel in channels])
+        channels_str = (
+            "`all`"
+            if isinstance(channels, str)
+            else ", ".join([channel.mention for channel in _channels])
+        )
         toggle_str = "enabled" if toggle else "disabled"
 
         await ctx.reply(f"Leveling has been {toggle_str} for channel {channels_str}")

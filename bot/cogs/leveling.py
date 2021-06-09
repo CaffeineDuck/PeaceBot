@@ -1,5 +1,5 @@
 import random
-from typing import Optional
+from typing import Optional, Text, Union
 
 import discord
 from discord.ext import commands
@@ -102,15 +102,23 @@ class Leveling(BetterCog):
         )
         await ctx.reply(embed=ranks_embed)
 
+    @commands.guild_only()
+    @commands.group("lvlcfg", invoke_without_command=True)
+    async def leveling_config(self, ctx: commands.Context):
+        """Configure the leveling system from this command"""
+        await ctx.send_help(ctx.command)
+
     @commands.has_permissions(manage_roles=True)
-    @commands.group(aliases=["rolerew"], invoke_without_command=True)
+    @leveling_config.group(aliases=["rolerew"], invoke_without_command=True)
     async def role_rewards(self, ctx: commands.Context):
+        """Configure rolerewards/ leveling based roles from here"""
         await ctx.send_help(ctx.command)
 
     @role_rewards.command(name="add")
     async def add_role_rewards(
         self, ctx: commands.Context, level: int, role: discord.Role
     ):
+        """Add role rewards/ leveling based roles"""
         guild_model = await self.bot.get_guild_model(ctx.guild.id)
 
         old_role_rewards = guild_model.xp_role_rewards
@@ -127,6 +135,7 @@ class Leveling(BetterCog):
 
     @role_rewards.command(name="remove", aliases=["rm"])
     async def remove_role_rewards(self, ctx: commands.Context, level: str):
+        """Remove role rewards/ leveling based roles"""
         guild_model = await self.bot.get_guild_model(ctx.guild.id)
         role_rewards = guild_model.xp_role_rewards
 
@@ -143,8 +152,9 @@ class Leveling(BetterCog):
             f"**Removed** role rewards for level {level} with role `{removed_role.name}`"
         )
 
-    @role_rewards.command(name="all", aliases=['list'])
+    @role_rewards.command(name="all", aliases=["list"])
     async def list_role_rewards(self, ctx: commands.Context):
+        """Show all the role rewards/ leveling based roles"""
         guild_model = await self.bot.get_guild_model(ctx.guild.id)
 
         try:
@@ -155,7 +165,7 @@ class Leveling(BetterCog):
                 ]
             )
         except AttributeError:
-            role_rewards_str = 'No role rewards setup!'
+            role_rewards_str = "No role rewards setup!"
 
         embed = discord.Embed(
             title="Role Rewards",
@@ -164,23 +174,29 @@ class Leveling(BetterCog):
         )
         await ctx.reply(embed=embed)
 
-    @commands.group("lvlcfg", invoke_without_command=True)
-    async def leveling_config(self, ctx: commands.Context):
-        await ctx.send_help(ctx.command)
-
-    @leveling_config.command(name="enable")
+    @leveling_config.group(name="enable", invoke_without_command=True)
     async def leveling_enable(
         self, ctx: commands.Context, channels: Greedy[discord.TextChannel] = None
     ):
+        """Enable leveling in given channels"""
         channels = channels or [ctx.channel]
         await self.leveling_handler.leveling_toggle_handler(channels, ctx, True)
 
-    @leveling_config.command(name="disable")
+    @leveling_enable.command(name="all")
+    async def leveling_enable_all(self, ctx: commands.Context):
+        await self.leveling_handler.leveling_toggle_handler("all", ctx, True)
+
+    @leveling_config.group(name="disable", invoke_without_command=True)
     async def leveling_disable(
-        self, ctx: commands.Context, channels: Greedy[discord.TextChannel] = None
+        self, ctx: commands.Context, channels: Greedy[discord.TextChannel] or str = None
     ):
+        """Enable leveling in given channels"""
         channels = channels or [ctx.channel]
         await self.leveling_handler.leveling_toggle_handler(channels, ctx, False)
+
+    @leveling_disable.command(name="all")
+    async def leveling_disable_all(self, ctx: commands.Context):
+        await self.leveling_handler.leveling_toggle_handler("all", ctx, False)
 
 
 def setup(bot):
