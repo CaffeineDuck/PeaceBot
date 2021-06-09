@@ -46,6 +46,7 @@ class Prabhidhikaar(BetterCog):
         self.bot.remove_cog("LastToLeaveVc")
 
     @commands.command()
+    @commands.cooldown(1, 600, commands.BucketType.user)
     @commands.has_any_role("Server Booster", "Kilo Chad 10+")
     async def addbot(self, ctx, user_id: BotUser, *, reason: str):
         """Requests your bot to be added to the server.
