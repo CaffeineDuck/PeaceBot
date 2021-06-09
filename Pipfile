@@ -22,6 +22,7 @@ tortoise-orm = "*"
 asyncpg = "*"
 pypika = "*"
 nepse-api = "==1.1.5a0"
+pillow = "*"
 
 [dev-packages]
 rope = "*"
