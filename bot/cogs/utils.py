@@ -1,3 +1,5 @@
+import inspect
+import os
 import re
 import sys
 from typing import Optional
@@ -187,6 +189,48 @@ class Utils(BetterCog):
         description = "```" + str(em.to_dict()) + "```"
         embed = Embed(description=description)
         await ctx.reply(embed=embed)
+
+    @commands.command(aliases=["github", "code"])
+    @commands.cooldown(1, 1, commands.BucketType.channel)
+    async def source(self, ctx, *, command: str = None):
+        """Displays my full source code or for a specific command.
+        To display the source code of a subcommand you can separate it by
+        periods or spaces.
+        """
+        github = '<:white_github:852245817175179284>'
+        embed = ctx.embed(title=f'{github} GitHub (Click Here) {github}')
+        source_url = 'https://github.com/samrid-pandit/peacebot'
+        branch = 'main'
+        if command is None:
+            embed.url = source_url
+            return await ctx.send(embed=embed)
+
+        if command == 'help':
+            src = type(self.bot.help_command)
+            module = src.__module__
+            filename = inspect.getsourcefile(src)
+        else:
+            obj = self.bot.get_command(command.replace('.', ' '))
+            if obj is None:
+                return await ctx.send(embed=ctx.error('Could not find command.'))
+
+            src = obj.callback.__code__
+            module = obj.callback.__module__
+            filename = src.co_filename
+
+        lines, firstlineno = inspect.getsourcelines(src)
+        if not module.startswith('discord'):
+            # not a built-in command
+            location = os.path.relpath(filename).replace('\\', '/')
+        else:
+            location = module.replace('.', '/') + '.py'
+            source_url = 'https://github.com/Rapptz/discord.py'
+            branch = 'master'
+
+        final_url = (f'{source_url}/blob/{branch}/{location}#L{firstlineno}-L'
+                     f'{firstlineno + len(lines) - 1}')
+        embed.url = final_url
+        await ctx.send(embed=embed)
 
 
 def teardown(bot: PeaceBot):
