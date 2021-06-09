@@ -13,17 +13,8 @@ BOT_TESTING_INFO = {
     "bot-entries": 852192052083294228,
     "terms": "By requesting to add your bot, you must agree to the guidelines presented in the <#852184861707862036>.",
     "role": 852204987127300168,
+    "test-guild": 852268585786671125,
 }
-
-
-def in_testing(info=BOT_TESTING_INFO):
-    def predicate(ctx: commands.Context):
-        try:
-            return ctx.channel.id == info["channel"]
-        except (AttributeError, KeyError):
-            return False
-
-    return commands.check(predicate)
 
 
 class Prabhidhikaar(BetterCog):
@@ -55,7 +46,7 @@ class Prabhidhikaar(BetterCog):
         self.bot.remove_cog("LastToLeaveVc")
 
     @commands.command()
-    @in_testing()
+    @commands.has_any_role(838316344311021588, 838294680776605737)
     async def addbot(self, ctx, user: BotUser, *, reason: str):
         """Requests your bot to be added to the server.
         To request your bot you must pass your bot's user ID and a reason
@@ -97,7 +88,9 @@ class Prabhidhikaar(BetterCog):
             return await ctx.send("Aborting.")
 
         url = f"https://discord.com/oauth2/authorize?client_id={user.id}&scope=bot&guild_id={ctx.guild.id}"
-        description = f"{reason}\n\n[Invite URL]({url})"
+        url2 = f"https://discord.com/oauth2/authorize?client_id={user.id}&scope=bot&guild_id={info.get('test-guild')}"
+
+        description = f"{reason}\n\n[Invite URL]({url})\n[Test Invite URL]({url2})"
         embed = discord.Embed(
             title="Bot Request",
             colour=discord.Colour.blurple(),
@@ -127,11 +120,6 @@ class Prabhidhikaar(BetterCog):
         await ctx.send(
             "Your bot has been requested to the moderators. I will DM you the status of your request."
         )
-
-    @addbot.error
-    async def on_addbot_error(self, ctx, error):
-        if isinstance(error, (commands.BadArgument, commands.MissingRequiredArgument)):
-            return await ctx.send(error)
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
@@ -208,7 +196,7 @@ class Prabhidhikaar(BetterCog):
 
         if not member.bot:
             return
-            
+
         role = member.guild.get_role(BOT_TESTING_INFO.get("role"))
         await member.add_roles(role)
 
