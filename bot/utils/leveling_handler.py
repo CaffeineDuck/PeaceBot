@@ -146,16 +146,13 @@ class LevelingHandler:
         valid = [model for model in commands_cache if check(model)]
 
         if valid:
-            print(f'INvalid: {message.author} -> "{message.content}"')
             return False
-        print(f'VALID: {message.author} -> "{message.content}"')
         return True
 
     async def handle_user_message(self, message: discord.Message) -> None:
         if not await self.checks(message):
             return
 
-        print(f'PASSED HOW???: {message.author} -> "{message.content}"')
         # Setting the message as it is used all over the class
         self._message = message
 
