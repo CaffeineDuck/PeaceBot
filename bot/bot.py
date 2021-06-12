@@ -48,28 +48,12 @@ class PeaceBot(commands.Bot):
         self._botBase__cogs = commands.core._CaseInsensitiveDict()
 
         if load_extensions:
-            self.load_extensions(
-                (
-                    "bot.cogs.core",
-                    "bot.cogs.config",
-                    "bot.cogs.personal_guild",
-                    "bot.cogs.snipe",
-                    "bot.cogs.emoji",
-                    "bot.cogs.moderation",
-                    "bot.cogs.nsfw",
-                    "bot.cogs.autoresponse",
-                    "bot.cogs.fun",
-                    "bot.cogs.misc",
-                    "bot.cogs.utils",
-                    "bot.cogs.reddit",
-                    "bot.cogs.animals",
-                    "bot.cogs.code_exec",
-                    "bot.cogs.error",
-                    "bot.cogs.prabhidhikaar",
-                    "bot.cogs.leveling",
-                    "bot.cogs.image"
-                )
-            )
+            for i in os.listdir("./bot/cogs"):
+                if i.endswith(".py"):
+                    try:
+                        self.load_extension(f"bot.cogs.{i[:-3]}")
+                    except Exception as e:
+                        raise e
 
         if loadjsk:
             self.load_extension("jishaku")
