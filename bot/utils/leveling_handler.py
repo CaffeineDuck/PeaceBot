@@ -137,6 +137,11 @@ class LevelingHandler:
         return user
 
     async def checks(self, message: discord.Message) -> bool:
+        guild_model = await self._bot.get_guild_model(message.guild.id)
+
+        if not guild_model.leveling_enabled:
+            return False
+
         commands_cache = await self._bot.get_commands_cache(message.guild.id)
         check = (
             lambda model: model.name == "leveling-system"
