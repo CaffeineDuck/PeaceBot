@@ -67,7 +67,7 @@ class PeaceBot(commands.Bot):
                     "bot.cogs.error",
                     "bot.cogs.prabhidhikaar",
                     "bot.cogs.leveling",
-                    "bot.cogs.image"
+                    "bot.cogs.image",
                 )
             )
 
@@ -168,7 +168,7 @@ class PeaceBot(commands.Bot):
         guild = self.guilds_cache.get(message.guild.id)
 
         if not guild:
-            guild = await GuildModel.get(id=message.guild.id)
+            guild, _ = await GuildModel.get_or_create(id=message.guild.id)
             self.guilds_cache[message.guild.id] = guild
 
         if not user:
@@ -181,7 +181,7 @@ class PeaceBot(commands.Bot):
         await self.process_commands(message)
 
     async def on_guild_join(self, guild: discord.Guild):
-        await GuildModel.get_or_create(id=guild.id).prefetch("GuildModel", "UserModel")
+        await GuildModel.get_or_create(id=guild.id)
 
     async def get_commands_cache(self, guild_id: int) -> List[CommandModel]:
         commands_cache = self.commands_cache.get(guild_id)
@@ -196,7 +196,7 @@ class PeaceBot(commands.Bot):
         guild_model = self.guilds_cache.get(guild_id)
 
         if not guild_model:
-            guild_model = await GuildModel.get(id=guild_id)
+            guild_model, _ = await GuildModel.get_or_create(id=guild_id)
 
         return guild_model
 
@@ -208,7 +208,7 @@ class PeaceBot(commands.Bot):
             self.users_cache[user_id] = user_model
 
         return user_model
-        
+
     # TODO: Add permission/ role check!
     async def check(self, ctx: commands.Context):
         if not ctx.guild:
@@ -240,7 +240,9 @@ class PeaceBot(commands.Bot):
             raise CommandDisabled(ctx.command.name, ctx.cog.qualified_name)
         return True
 
-    async def get_or_fetch_member(self, guild: discord.Guild, member_id: int) -> discord.Member:
+    async def get_or_fetch_member(
+        self, guild: discord.Guild, member_id: int
+    ) -> discord.Member:
 
         member = guild.get_member(member_id)
         if member is not None:
@@ -259,7 +261,6 @@ class PeaceBot(commands.Bot):
         if not members:
             return None
         return members[0]
-
 
     async def on_ready(self):
         print(f"Logged in as {self.user.name}#{self.user.discriminator}")
