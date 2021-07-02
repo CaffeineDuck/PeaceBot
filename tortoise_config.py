@@ -1,17 +1,15 @@
-from config import common
-
-database_uri = common.common.database_url
+from config.db import db_config
 
 tortoise_config = {
     "connections": {
         "default": {
             "engine": "tortoise.backends.asyncpg",
             "credentials": {
-                "database": database_uri.path[1:],
-                "host": database_uri.host,
-                "password": database_uri.password,
-                "port": database_uri.port or 5432,
-                "user": database_uri.user,
+                "database": db_config.db,
+                "host": db_config.host,
+                "password": db_config.password,
+                "port": db_config.port,
+                "user": db_config.user,
             },
         }
     },
