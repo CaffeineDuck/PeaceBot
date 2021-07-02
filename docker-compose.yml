@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+    db:
+        image: postgres:latest
+        volumes: 
+            - postgres_db:/var/lib/postgresql/data
+        env_file: .env
+
+    bot:
+        image: samrid/peacebot:latest
+        env_file: .env
+        depends_on:
+            - db
+            - lavalink
+        links: 
+            - db:postgres
+            - lavalink:lavalink
+    
+    
+    lavalink:
+        image: samrid/ready-lavalink
+    
+volumes:
+    postgres_db:

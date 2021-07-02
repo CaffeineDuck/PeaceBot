@@ -1,0 +1,15 @@
+# Python Stuffs
+__pycache__/
+
+# VS Code Stufss
+.vscode/
+
+# Config Stuffs
+.env
+
+# Tortoise Orm
+aerich.ini
+migrations/
+
+# Git stuffs
+.git
