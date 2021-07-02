@@ -7,7 +7,7 @@ name = "pypi"
 aerich = "*"
 python-dotenv = "*"
 jishaku = "*"
-"discord.py" = "*"
+"discord.py" = {extras = ["voice"], version = "*"}
 PyYAML = "*"
 asyncpraw = "*"
 pydantic = "*"
@@ -23,6 +23,7 @@ asyncpg = "*"
 pypika = "*"
 nepse-api = "==1.1.5a0"
 pillow = "*"
+wavelink = "*"
 
 [dev-packages]
 rope = "*"
