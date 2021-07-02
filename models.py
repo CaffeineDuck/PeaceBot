@@ -17,7 +17,9 @@ class GuildModel(Model):
         description="BackGround image banner for the `rank` command", null=True
     )
     leveling_enabled = fields.BooleanField(
-        defualt=False, description="Leveling Enabled or Disabled for the guild!", null=True
+        defualt=False,
+        description="Leveling Enabled or Disabled for the guild!",
+        null=True,
     )
     xp_multiplier = fields.IntField(description="Xp Multipication Value", default=1)
     xp_role_rewards = fields.JSONField(

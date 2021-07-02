@@ -1,13 +1,12 @@
-from bot.utils.mixins.better_cog import BetterCog
-from typing import Optional
 import inspect
+from typing import Optional
 
-from discord.ext.commands import CogMeta, Command, BucketType, cooldown
-from discord.ext.commands import Context
-from discord import Member, File
+from discord import File, Member
+from discord.ext.commands import BucketType, CogMeta, Command, Context, cooldown
 
 from bot.utils.imggen.imggen.core import BaseImageGenerator, ImageType
 from bot.utils.imggen.imggen.meme import MemeGenerator
+from bot.utils.mixins.better_cog import BetterCog
 
 
 def image_paste_command(func_name: str):

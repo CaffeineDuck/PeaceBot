@@ -1,11 +1,12 @@
 import asyncio
+
 import discord
 from discord.ext import commands
 
 from bot.bot import PeaceBot
 from bot.cogs.events.last_to_leave_vc import LastToLeaveVc
-from bot.utils.mixins.better_cog import BetterCog
 from bot.utils.botuser import BotUser
+from bot.utils.mixins.better_cog import BetterCog
 
 PRABHIDHIKAAR_GUILD_ID = 836230453622341663
 BOT_TESTING_INFO = {

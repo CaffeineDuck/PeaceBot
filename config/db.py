@@ -1,5 +1,6 @@
 from pydantic import BaseSettings
 
+
 class DbConfig(BaseSettings):
     user: str
     password: str
