@@ -68,6 +68,7 @@ class PeaceBot(commands.Bot):
                     "bot.cogs.prabhidhikaar",
                     "bot.cogs.leveling",
                     "bot.cogs.image",
+                    "bot.cogs.music",
                 )
             )
 
