@@ -108,6 +108,16 @@ class Leveling(BetterCog):
         """Configure the leveling system from this command"""
         await ctx.send_help(ctx.command)
 
+    @leveling_config.command(name="toggle")
+    async def leveling_guild_toggle(self, ctx: commands.Context, toggle: bool):
+        model = await self.bot.get_guild_model(ctx.guild.id)
+        model.leveling_enabled = toggle
+        await model.save()
+        self.bot.guilds_cache[ctx.guild.id] = model
+
+        toggle_str = "enabled" if toggle else "disabled"
+        await ctx.send(f"Leveling has been fully `{toggle_str}` in this guild!")
+
     @commands.has_permissions(manage_roles=True)
     @leveling_config.group(aliases=["rolerew"], invoke_without_command=True)
     async def role_rewards(self, ctx: commands.Context):
