@@ -111,9 +111,9 @@ class PeaceBot(commands.Bot):
 
     @tasks.loop(seconds=0, count=1)
     async def connect_db(self):
-        print("Connecting to db")
+        logging.info("Connecting to db")
         await Tortoise.init(self.tortoise_config)
-        print("Database connected")
+        logging.info("Database connected")
 
     @tasks.loop(seconds=10)
     async def change_status(self):
@@ -142,11 +142,11 @@ class PeaceBot(commands.Bot):
                             pass
                         finally:
                             self.load_extension(extension_name)
-                            print(f"AutoReloaded {extension_name}.")
+                            logging.info(f"AutoReloaded {extension_name}.")
                     else:
                         try:
                             self.unload_extension(extension_name)
-                            print(f"AutoUnloaded {extension_name}.")
+                            logging.info(f"AutoUnloaded {extension_name}.")
                         except commands.ExtensionNotLoaded:
                             pass
                 except (commands.ExtensionFailed, commands.NoEntryPointError) as e:
@@ -156,12 +156,12 @@ class PeaceBot(commands.Bot):
         for ext in extentions:
             try:
                 self.load_extension(ext)
-                print(f"Loaded {ext}")
+                logging.info(f"Loaded {ext}")
             except Exception as e:
                 traceback.print_exception(type(e), e, e.__traceback__)
 
     async def on_message(self, message: Message):
-        if not message.guild:
+        if message.guild == None:
             await self.process_commands(message)
 
         user = self.users_cache.get(message.author.id)
@@ -263,7 +263,7 @@ class PeaceBot(commands.Bot):
         return members[0]
 
     async def on_ready(self):
-        print(f"Logged in as {self.user.name}#{self.user.discriminator}")
+        logging.info(f"Logged in as {self.user.name}#{self.user.discriminator}")
         if self.developement_environment:
             self.cog_watcher_task.start()
-        print("Ready")
+        logging.info("Ready")
