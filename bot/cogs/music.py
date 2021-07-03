@@ -8,17 +8,17 @@ from enum import Enum
 
 import discord
 import wavelink
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 from bot.utils.mixins.better_cog import BetterCog
 
 URL_REGEX = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
 OPTIONS = {
     "1️⃣": 0,
-    "2⃣": 1,
-    "3⃣": 2,
-    "4⃣": 3,
-    "5⃣": 4,
+    "2️⃣": 1,
+    "3️⃣": 2,
+    "4️⃣": 3,
+    "5️⃣": 4,
 }
 
 
@@ -240,7 +240,7 @@ class Music(BetterCog, wavelink.WavelinkMixin):
     def __init__(self, bot):
         self.bot = bot
         self.wavelink = wavelink.Client(bot=bot)
-        self.bot.loop.create_task(self.start_nodes())
+        self.start_nodes.start()
         super().__init__(bot)
 
     @commands.Cog.listener()
@@ -269,8 +269,10 @@ class Music(BetterCog, wavelink.WavelinkMixin):
 
         return True
 
+    @tasks.loop(seconds=0, count=1)
     async def start_nodes(self):
         await self.bot.wait_until_ready()
+        logging.info("Starting wavelink nodes")
 
         nodes = {
             "MAIN": {
@@ -285,6 +287,7 @@ class Music(BetterCog, wavelink.WavelinkMixin):
 
         for node in nodes.values():
             await self.wavelink.initiate_node(**node)
+        logging.info("Wavelink nodes started!")
 
     def get_player(self, obj):
         if isinstance(obj, commands.Context):
