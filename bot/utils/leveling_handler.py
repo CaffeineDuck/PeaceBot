@@ -272,6 +272,9 @@ class LevelingHandler:
 
         guild_model = await self._bot.get_guild_model(user_model.guild_id)
 
+        if not guild_model.xp_role_rewards:
+            return
+
         if user_model.level not in guild_model.xp_role_rewards.keys():
             return
 
