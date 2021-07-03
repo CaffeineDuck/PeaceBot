@@ -6,6 +6,7 @@ from typing import List
 
 import discord
 import watchgod
+from aiohttp import ClientSession
 from cachetools import LRUCache
 from discord import Intents, Message
 from discord.ext import commands, tasks
@@ -24,6 +25,7 @@ class PeaceBot(commands.Bot):
         *,
         tortoise_config: dict,
         prefix: str,
+        log_webhook_url: str,
         load_extensions: bool = True,
         loadjsk: bool = True,
         developement_environment: bool = True,
@@ -36,6 +38,7 @@ class PeaceBot(commands.Bot):
         )
         self.tortoise_config = tortoise_config
         self.developement_environment = developement_environment
+        self.log_webhook_url = log_webhook_url
         self.connect_db.start()
         self.prefix = prefix
         self.prefixes_cache = LRUCache(1000)
@@ -94,6 +97,7 @@ class PeaceBot(commands.Bot):
         )
         self.change_status.start()
 
+    # Determine the unique prefix for each guild
     async def cache_guild_prefix(self, message: Message) -> None:
         guild_model = await GuildModel.from_guild_object(message.guild)
         self.prefixes_cache[message.guild.id] = guild_model.prefix
@@ -110,6 +114,18 @@ class PeaceBot(commands.Bot):
 
         return commands.when_mentioned_or(prefix)(bot, message)
 
+    # Properties
+    @property
+    def session(self) -> ClientSession:
+        return self.http._HTTPClient__session
+
+    @property
+    def log_webhook(self) -> discord.Webhook:
+        return discord.Webhook.from_url(
+            self.log_webhook_url, adapter=discord.AsyncWebhookAdapter(self.session)
+        )
+
+    # Loops for connecting db, watching cogs and changing status
     @tasks.loop(seconds=0, count=1)
     async def connect_db(self):
         logging.info("Connecting to db")
@@ -153,6 +169,7 @@ class PeaceBot(commands.Bot):
                 except (commands.ExtensionFailed, commands.NoEntryPointError) as e:
                     traceback.print_exception(type(e), e, e.__traceback__)
 
+    # Function to load extension
     def load_extensions(self, extentions: List[str]):
         for ext in extentions:
             try:
@@ -161,6 +178,7 @@ class PeaceBot(commands.Bot):
             except Exception as e:
                 traceback.print_exception(type(e), e, e.__traceback__)
 
+    # On Message checks
     async def on_message(self, message: Message):
         if message.guild == None:
             await self.process_commands(message)
@@ -181,9 +199,11 @@ class PeaceBot(commands.Bot):
 
         await self.process_commands(message)
 
+    # Creates a guild model on joining guild
     async def on_guild_join(self, guild: discord.Guild):
         await GuildModel.get_or_create(id=guild.id)
 
+    # DB models caching handlers
     async def get_commands_cache(self, guild_id: int) -> List[CommandModel]:
         commands_cache = self.commands_cache.get(guild_id)
 
@@ -210,6 +230,7 @@ class PeaceBot(commands.Bot):
 
         return user_model
 
+    # Custom channel check for running commands
     # TODO: Add permission/ role check!
     async def check(self, ctx: commands.Context):
         if not ctx.guild:
@@ -241,6 +262,7 @@ class PeaceBot(commands.Bot):
             raise CommandDisabled(ctx.command.name, ctx.cog.qualified_name)
         return True
 
+    # Gets or create member model from db
     async def get_or_fetch_member(
         self, guild: discord.Guild, member_id: int
     ) -> discord.Member:
@@ -263,6 +285,7 @@ class PeaceBot(commands.Bot):
             return None
         return members[0]
 
+    # On ready methods
     async def on_ready(self):
         logging.info(f"Logged in as {self.user.name}#{self.user.discriminator}")
         if self.developement_environment:
