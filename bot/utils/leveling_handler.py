@@ -275,7 +275,7 @@ class LevelingHandler:
         if not guild_model.xp_role_rewards:
             return
 
-        if user_model.level not in guild_model.xp_role_rewards.keys():
+        if str(user_model.level) not in guild_model.xp_role_rewards.keys():
             return
 
         if mee6_import:
