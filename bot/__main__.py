@@ -17,7 +17,7 @@ if __name__ == "__main__":
         tortoise_config=tortoise_config,
         prefix=bot_config.prefix,
         developement_environment=bot_config.developement_environment,
-        log_webhook_url=misc_settings.log_webhook_url
+        log_webhook_url=misc_settings.log_webhook_url,
     )
 
     bot.run(bot_config.token)
