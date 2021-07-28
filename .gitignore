@@ -7,3 +7,6 @@ __pycache__/
 # Databse stuffs
 aerich.ini
 migrations/
+
+# Editor Stuffs
+.vscode
