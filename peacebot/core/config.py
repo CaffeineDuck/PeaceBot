@@ -23,3 +23,4 @@ class BotConfig(BaseModel):
     lavalink_config: Optional[LavalinkConfig]
     db_config: Optional[dict]
     private_bot: Optional[bool] = False
+    load_jishaku: Optional[bool] = True
