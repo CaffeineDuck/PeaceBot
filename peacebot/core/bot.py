@@ -46,7 +46,7 @@ class PeaceBot(commands.Bot):
 
         # Loads cogs
         if self.config.load_jishaku:
-            self.load_extension('jishaku')
+            self.load_extension("jishaku")
 
     @property
     def event_loop(self) -> asyncio.BaseEventLoop:
@@ -92,7 +92,9 @@ class PeaceBot(commands.Bot):
                 "rest_uri": lavalink_config.rest_url,
             }
         }
-        _ = [await self.wavelink_client.initiate_node(**node) for node in nodes.values()]
+        _ = [
+            await self.wavelink_client.initiate_node(**node) for node in nodes.values()
+        ]
         logger.info("Connected to wavelink nodes")
 
     async def _determine_prefix(self, _: commands.Bot, message: discord.Message) -> str:
