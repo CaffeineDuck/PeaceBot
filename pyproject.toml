@@ -7,10 +7,14 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-"discord.py" = "^1.7.3"
+"discord.py" = {extras = ["voice"], version = "^1.7.3"}
 jishaku = "^2.2.0"
 pydantic = "^1.8.2"
 cachetools = "^4.2.2"
+tortoise-orm = {extras = ["asyncpg"], version = "^0.17.6"}
+wavelink = "^0.9.10"
+python-dotenv = "^0.19.0"
+aerich = "^0.5.5"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^21.7b0", allow-prereleases = true}
