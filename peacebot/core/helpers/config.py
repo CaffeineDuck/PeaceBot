@@ -18,7 +18,7 @@ class DatabaseConfig(BaseModel):
     """
 
     db: str
-    host: Union[IPv4Address, Literal["localhost"]]
+    host: Union[IPv4Address, Literal["localhost"], Literal["postgres"]]
     password: str
     port: int = 5432
     user: str
@@ -29,7 +29,7 @@ class LavalinkConfig(BaseModel):
     This is a model containing lavalink info
     """
 
-    host: Union[IPv4Address, Literal["localhost"]]
+    host: Union[IPv4Address, Literal["localhost"], Literal["lavalink"]]
     port: int
     rest_url: str
     identifier: str = "MAIN"
