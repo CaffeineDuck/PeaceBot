@@ -1,7 +1,11 @@
+"""This module contains all the types used in initializing `peacebot`"""
+
 from enum import Enum
 
 
 class VoiceRegions(Enum):
+    """This Enum contains all the discord Voice Regions"""
+
     AMSTERDAM = "amseterdam"
     BRAZIL = "brazil"
     EU_WEST = "eu_west"
