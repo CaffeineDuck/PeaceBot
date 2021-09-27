@@ -101,7 +101,7 @@ class Moderation(BetterCog):
         channel = ctx.message.channel
         await ctx.message.delete()
         deleted_messages = len(await channel.purge(limit=num_messages))
-        await ctx.reply(
+        await ctx.send(
             f"`{deleted_messages} messages has been deleted!`", delete_after=5
         )
 
